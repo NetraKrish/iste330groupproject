@@ -1,3 +1,5 @@
+-- noinspection SqlDialectInspectionForFile
+
 -- ISTE-330 Group 4: Database
 -- 04/14/2023
 
@@ -7,91 +9,91 @@ USE research;
 
 -- Create the tables
 CREATE TABLE IF NOT EXISTS role (
-    role_id INT NOT NULL AUTO_INCREMENT,
-    role_name VARCHAR(50) NOT NULL,
+    roleID INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL,
     PRIMARY KEY (role_id)
 );
 
 CREATE TABLE IF NOT EXISTS account (
-    account_id INT NOT NULL AUTO_INCREMENT,
+    accountID INT NOT NULL AUTO_INCREMENT,
     firstName VARCHAR(50) NOT NULL,
     lastName VARCHAR(50) NOT NULL,
-    account_password VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
     preferredContact VARCHAR(50) NOT NULL,
-    role_id INT NOT NULL,
-    PRIMARY KEY (account_id),
-    FOREIGN KEY (role_id) REFERENCES role(role_id)
+    roleID INT NOT NULL,
+    PRIMARY KEY (accountID),
+    FOREIGN KEY (roleID) REFERENCES role(roleID)
 );
 
 CREATE TABLE IF NOT EXISTS contact (
-    account_id INT NOT NULL,
+    accountID INT NOT NULL,
     email VARCHAR(50) NOT NULL,
     phone VARCHAR(50) NOT NULL,
-    PRIMARY KEY (account_id),
-    FOREIGN KEY (account_id) REFERENCES account(account_id)
+    PRIMARY KEY (accountID),
+    FOREIGN KEY (accountID) REFERENCES account(accountID)
 );
 
 CREATE TABLE IF NOT EXISTS office (
-    account_id INT NOT NULL,
-    building_name VARCHAR(50) NOT NULL,
-    office_number VARCHAR(50) NOT NULL,
-    PRIMARY KEY (account_id),
-    FOREIGN KEY (account_id) REFERENCES account(account_id)
+    accountID INT NOT NULL,
+    building VARCHAR(50) NOT NULL,
+    office VARCHAR(50) NOT NULL,
+    PRIMARY KEY (accountID),
+    FOREIGN KEY (accountID) REFERENCES account(accountID)
 );
 
 CREATE TABLE IF NOT EXISTS abstract (
-    abstract_id INT NOT NULL AUTO_INCREMENT,
-    abstract_title VARCHAR(50) NOT NULL,
-    abstract_text VARCHAR(120) NOT NULL,
-    PRIMARY KEY (abstract_id)
+    abstractID INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(50) NOT NULL,
+    body TEXT NOT NULL,
+    PRIMARY KEY (abstractID)
 );
 
 CREATE TABLE IF NOT EXISTS faculty_abstract (
-    account_id INT NOT NULL,
-    abstract_id INT NOT NULL,
-    PRIMARY KEY (account_id, abstract_id),
-    FOREIGN KEY (account_id) REFERENCES account(account_id),
-    FOREIGN KEY (abstract_id) REFERENCES abstract(abstract_id)
+    accountID INT NOT NULL,
+    abstractID INT NOT NULL,
+    PRIMARY KEY (accountID, abstractID),
+    FOREIGN KEY (accountID) REFERENCES account(accountID),
+    FOREIGN KEY (abstractID) REFERENCES abstract(abstractID)
 ); 
 
-CREATE TABLE IF NOT EXISTS account_faculty_interests (
-    account_id INT NOT NULL,
-    search_term_id INT NOT NULL,
-    PRIMARY KEY (account_id, search_term_id),
-    FOREIGN KEY (account_id) REFERENCES account(account_id),
-    FOREIGN KEY (search_term_id) REFERENCES search(search_term_id)
+CREATE TABLE IF NOT EXISTS account_faculty_interest (
+    accountID INT NOT NULL,
+    interestID INT NOT NULL,
+    PRIMARY KEY (accountID, interestID),
+    FOREIGN KEY (accountID) REFERENCES account(accountID),
+    FOREIGN KEY (interestID) REFERENCES faculty_interest(interestID)
 );
 
-CREATE TABLE IF NOT EXISTS faculty_topic (
-    topic_id INT NOT NULL AUTO_INCREMENT,
-    topic VARCHAR(50) NOT NULL,
-    PRIMARY KEY (search_term_id)
+CREATE TABLE IF NOT EXISTS faculty_interest (
+    interestID INT NOT NULL AUTO_INCREMENT,
+    interest VARCHAR(50) NOT NULL,
+    PRIMARY KEY (interestID)
 );
 
-CREATE TABLE IF NOT EXISTS account_student_interests (
-    account_id INT NOT NULL,
-    search_term_id INT NOT NULL,
-    PRIMARY KEY (account_id, search_term_id),
-    FOREIGN KEY (account_id) REFERENCES account(account_id),
-    FOREIGN KEY (search_term_id) REFERENCES search(search_term_id)
+CREATE TABLE IF NOT EXISTS account_student_interest (
+    accountID INT NOT NULL,
+    interestID INT NOT NULL,
+    PRIMARY KEY (accountID, interestID),
+    FOREIGN KEY (accountID) REFERENCES account(accountID),
+    FOREIGN KEY (interestID) REFERENCES student_interest(interestID)
 );
 
-CREATE TABLE IF NOT EXISTS student_topic (
-    search_term_id INT NOT NULL AUTO_INCREMENT,
-    search_term VARCHAR(50) NOT NULL,
-    PRIMARY KEY (search_term_id)
+CREATE TABLE IF NOT EXISTS student_interest (
+    interestID INT NOT NULL AUTO_INCREMENT,
+    interest VARCHAR(50) NOT NULL,
+    PRIMARY KEY (interestID)
 );
 
 CREATE TABLE IF NOT EXISTS account_guest_interests (
-    account_id INT NOT NULL,
-    search_term_id INT NOT NULL,
-    PRIMARY KEY (account_id, search_term_id),
-    FOREIGN KEY (account_id) REFERENCES account(account_id),
-    FOREIGN KEY (search_term_id) REFERENCES search(search_term_id)
+    accountID INT NOT NULL,
+    interestID INT NOT NULL,
+    PRIMARY KEY (accountID, interestID),
+    FOREIGN KEY (accountID) REFERENCES account(accountID),
+    FOREIGN KEY (interestID) REFERENCES guest_interest(interestID)
 );
 
-CREATE TABLE IF NOT EXISTS guest_topic (
-    search_term_id INT NOT NULL AUTO_INCREMENT,
-    search_term VARCHAR(50) NOT NULL,
-    PRIMARY KEY (search_term_id)
+CREATE TABLE IF NOT EXISTS guest_interest (
+    interestID INT NOT NULL AUTO_INCREMENT,
+    interest VARCHAR(50) NOT NULL,
+    PRIMARY KEY (interestID)
 );
