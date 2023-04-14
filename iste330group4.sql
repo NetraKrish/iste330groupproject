@@ -103,3 +103,24 @@ CREATE TABLE IF NOT EXISTS account_guest_interest (
     CONSTRAINT account_guest_interest_accountID_FK FOREIGN KEY (accountID) REFERENCES account(accountID) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT account_guest_interest_interestID_FK FOREIGN KEY (interestID) REFERENCES guest_interest(interestID) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES 
+("Tom", "Bombadil", "HH88P6Zmmgb4Dop8pwwvlzSGWmgNFesSwo0Vow6xJd0=", "office visit", 2), 
+("James", "Bond", "zsPC6/3tioC7RLr1ibeughOIUynmbdjon3MSRPdwTog=", "email", 2), 
+("jimmy", "john", "fuJS5U4HQpNXJ8ci/Q/a5VT+Ad27+WHzFfnx+omvLrU=", "phone", 1),
+("johnny", "jim", "k/CfMae9IgeaQHhha+UgEqpcWooei+Ix06tFGHrh+9k=", "phone", 1),
+("john", "smith", "txjxNU9yRzEuyghtmgJK/l+nF93qWt7d1vErz5RbLow=", "none", 3);
+
+INSERT INTO iste330group4.office(accountID, building, number) VALUES 
+(1, "forest", "a301"),
+(2, "MI6", "007");
+INSERT INTO iste330group4.contact(accountID, email, phone) VALUES 
+(1, "email01@this.dontmatter", "0123456789"), 
+(2, "007@this.dontmatter", "0070070070"),
+(3, "email02@this.dontmatter", "987654321"),
+(4, "email03@this.dontmatter", "123459876"),
+(5, "nunya", "beeswax");
+
+
+
+
