@@ -3,15 +3,17 @@
 -- ISTE-330 Group 4: Database
 -- 04/14/2023
 
+DROP DATABASE IF EXISTS iste330group4;
+
 -- Create the database
-CREATE DATABASE IF NOT EXISTS research;
-USE research;
+CREATE DATABASE IF NOT EXISTS iste330group4;
+USE iste330group4;
 
 -- Create the tables
 CREATE TABLE IF NOT EXISTS role (
     roleID INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
-    PRIMARY KEY (role_id)
+    PRIMARY KEY (roleID)
 );
 
 CREATE TABLE IF NOT EXISTS account (
@@ -54,7 +56,13 @@ CREATE TABLE IF NOT EXISTS faculty_abstract (
     PRIMARY KEY (accountID, abstractID),
     FOREIGN KEY (accountID) REFERENCES account(accountID),
     FOREIGN KEY (abstractID) REFERENCES abstract(abstractID)
-); 
+);
+
+CREATE TABLE IF NOT EXISTS faculty_interest (
+    interestID INT NOT NULL AUTO_INCREMENT,
+    interest VARCHAR(50) NOT NULL,
+    PRIMARY KEY (interestID)
+);
 
 CREATE TABLE IF NOT EXISTS account_faculty_interest (
     accountID INT NOT NULL,
@@ -64,7 +72,7 @@ CREATE TABLE IF NOT EXISTS account_faculty_interest (
     FOREIGN KEY (interestID) REFERENCES faculty_interest(interestID)
 );
 
-CREATE TABLE IF NOT EXISTS faculty_interest (
+CREATE TABLE IF NOT EXISTS student_interest (
     interestID INT NOT NULL AUTO_INCREMENT,
     interest VARCHAR(50) NOT NULL,
     PRIMARY KEY (interestID)
@@ -78,22 +86,16 @@ CREATE TABLE IF NOT EXISTS account_student_interest (
     FOREIGN KEY (interestID) REFERENCES student_interest(interestID)
 );
 
-CREATE TABLE IF NOT EXISTS student_interest (
+CREATE TABLE IF NOT EXISTS guest_interest (
     interestID INT NOT NULL AUTO_INCREMENT,
     interest VARCHAR(50) NOT NULL,
     PRIMARY KEY (interestID)
 );
 
-CREATE TABLE IF NOT EXISTS account_guest_interests (
+CREATE TABLE IF NOT EXISTS account_guest_interest (
     accountID INT NOT NULL,
     interestID INT NOT NULL,
     PRIMARY KEY (accountID, interestID),
     FOREIGN KEY (accountID) REFERENCES account(accountID),
     FOREIGN KEY (interestID) REFERENCES guest_interest(interestID)
-);
-
-CREATE TABLE IF NOT EXISTS guest_interest (
-    interestID INT NOT NULL AUTO_INCREMENT,
-    interest VARCHAR(50) NOT NULL,
-    PRIMARY KEY (interestID)
 );
