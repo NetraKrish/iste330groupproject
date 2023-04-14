@@ -16,6 +16,10 @@ CREATE TABLE IF NOT EXISTS role (
     PRIMARY KEY (roleID)
 );
 
+INSERT INTO role (name) VALUES ("student"); -- 1
+INSERT INTO role (name) VALUES ("faculty"); -- 2
+INSERT INTO role (name) VALUES ("guest");   -- 3
+
 CREATE TABLE IF NOT EXISTS account (
     accountID INT NOT NULL AUTO_INCREMENT,
     firstName VARCHAR(50) NOT NULL,
@@ -24,7 +28,7 @@ CREATE TABLE IF NOT EXISTS account (
     preferredContact VARCHAR(50) NOT NULL,
     roleID INT NOT NULL,
     PRIMARY KEY (accountID),
-    FOREIGN KEY (roleID) REFERENCES role(roleID)
+    CONSTRAINT account_roleID_FK FOREIGN KEY (roleID) REFERENCES role(roleID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS contact (
@@ -32,15 +36,15 @@ CREATE TABLE IF NOT EXISTS contact (
     email VARCHAR(50) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     PRIMARY KEY (accountID),
-    FOREIGN KEY (accountID) REFERENCES account(accountID)
+    CONSTRAINT contact_accountID_FK FOREIGN KEY (accountID) REFERENCES account(accountID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS office (
     accountID INT NOT NULL,
     building VARCHAR(50) NOT NULL,
-    office VARCHAR(50) NOT NULL,
+    number VARCHAR(50) NOT NULL,
     PRIMARY KEY (accountID),
-    FOREIGN KEY (accountID) REFERENCES account(accountID)
+    CONSTRAINT office_accountID_FK FOREIGN KEY (accountID) REFERENCES account(accountID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS abstract (
@@ -54,8 +58,8 @@ CREATE TABLE IF NOT EXISTS faculty_abstract (
     accountID INT NOT NULL,
     abstractID INT NOT NULL,
     PRIMARY KEY (accountID, abstractID),
-    FOREIGN KEY (accountID) REFERENCES account(accountID),
-    FOREIGN KEY (abstractID) REFERENCES abstract(abstractID)
+    CONSTRAINT faculty_abstract_accountID_FK FOREIGN KEY (accountID) REFERENCES account(accountID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT faculty_abstract_abstractID_FK FOREIGN KEY (abstractID) REFERENCES abstract(abstractID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS faculty_interest (
@@ -68,8 +72,8 @@ CREATE TABLE IF NOT EXISTS account_faculty_interest (
     accountID INT NOT NULL,
     interestID INT NOT NULL,
     PRIMARY KEY (accountID, interestID),
-    FOREIGN KEY (accountID) REFERENCES account(accountID),
-    FOREIGN KEY (interestID) REFERENCES faculty_interest(interestID)
+    CONSTRAINT account_faculty_interest_accountID_FK FOREIGN KEY (accountID) REFERENCES account(accountID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT account_faculty_interest_interestID_FK FOREIGN KEY (interestID) REFERENCES faculty_interest(interestID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS student_interest (
@@ -82,8 +86,8 @@ CREATE TABLE IF NOT EXISTS account_student_interest (
     accountID INT NOT NULL,
     interestID INT NOT NULL,
     PRIMARY KEY (accountID, interestID),
-    FOREIGN KEY (accountID) REFERENCES account(accountID),
-    FOREIGN KEY (interestID) REFERENCES student_interest(interestID)
+    CONSTRAINT account_student_interest_accountID_FK FOREIGN KEY (accountID) REFERENCES account(accountID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT account_student_interest_interestID_FK FOREIGN KEY (interestID) REFERENCES student_interest(interestID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS guest_interest (
@@ -96,6 +100,6 @@ CREATE TABLE IF NOT EXISTS account_guest_interest (
     accountID INT NOT NULL,
     interestID INT NOT NULL,
     PRIMARY KEY (accountID, interestID),
-    FOREIGN KEY (accountID) REFERENCES account(accountID),
-    FOREIGN KEY (interestID) REFERENCES guest_interest(interestID)
+    CONSTRAINT account_guest_interest_accountID_FK FOREIGN KEY (accountID) REFERENCES account(accountID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT account_guest_interest_interestID_FK FOREIGN KEY (interestID) REFERENCES guest_interest(interestID) ON DELETE CASCADE ON UPDATE CASCADE
 );
