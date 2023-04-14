@@ -4,6 +4,7 @@
 -- Create the database
 DROP DATABASE IF EXISTS research;
 CREATE DATABASE research;
+USE research;
 
 -- Create the tables
 CREATE TABLE account (
