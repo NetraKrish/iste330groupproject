@@ -1,9 +1,6 @@
 package groupproject;
 
-import groupproject.objects.Abstract;
-import groupproject.objects.Contact;
-import groupproject.objects.Interest;
-import groupproject.objects.SearchRecord;
+import groupproject.objects.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
@@ -114,27 +111,98 @@ public class DataLayerMiles {
      * Interests (keyword) are a short phrase, or title. (ex. Backend Programming)
      */
 
-    /**
+    /***********************
      * SEARCH RECORDS THING
-     */
+     ***********************/
 
-//    public List<SearchRecord> matchingFacultyInterests(int accountID, String interestsStr) {
-//
-//        List<SearchRecord> searchRecords = new LinkedList<>();
-//
-//        try {
-//
-//            String[] interests = interestsStr.split(",");
-//
-//            String sql = "SELECT firstName, lastName FROM account WHERE roleID != 3 AND accountID != ? AND ";
-//
-//        }catch (SQLException e) {
-//
-//            SQLExceptionMsg(e.getMessage());
-//        }
-//
-//        return searchRecords;
-//    }
+    private List<SearchRecord> searchRecords(String role, String interestsInput) {
+
+        List<SearchRecord> searchRecords = new LinkedList<>();
+
+        try {
+
+            String sql = "SELECT concat(a.firstName,', ' , a.lastName) as 'name', afi.accountID as 'accountID', group_concat(' ', fi.interest) AS 'commonInterests' FROM " + role + "_interest as fi JOIN account_" + role + "_interest as afi on fi.interestID=afi.interestID JOIN account as a on afi.accountID=a.accountID WHERE fi.interest IN (";
+            String[] interests = interestsInput.split(",");
+
+            for(String interest : interests) {
+
+                sql += "?,";
+            }
+
+            sql = sql.substring(0, sql.length() - 1);
+            sql += ") group by afi.accountID order by count(fi.interest) desc";
+
+            this.stmt = this.conn.prepareStatement(sql);
+
+            for(int i = 1; i <= interests.length; i++) {
+
+                this.stmt.setString(i, interests[i - 1]);
+            }
+
+            this.rs = this.stmt.executeQuery();
+
+            while(this.rs.next()) {
+
+                searchRecords.add(new SearchRecord(
+                        this.rs.getInt("accountID"),
+                        this.rs.getString("name"),
+                        this.rs.getString("commonInterests")
+                ));
+            }
+
+            reset();
+
+        }catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return searchRecords;
+    }
+
+    public List<SearchRecord> facultySearch(String interestsInput) {
+
+        return searchRecords("faculty", interestsInput);
+    }
+
+    public List<SearchRecord> studentSearch(String interestsInput) {
+
+        return searchRecords("student", interestsInput);
+    }
+
+    /*******************
+     * OFFICE SECTION
+     *******************/
+
+    public Office getOffice(int accountID) {
+
+        Office office = new Office();
+
+        try {
+
+            String sql = "SELECT * FROM office WHERE accountID = ?";
+
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, accountID);
+
+            this.rs = this.stmt.executeQuery();
+
+            if(this.rs.next()) {
+
+                office.setAccountID(accountID);
+                office.setBuilding(this.rs.getString("building"));
+                office.setNumber(this.rs.getString("number"));
+            }
+
+            reset();
+
+        }catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return office;
+    }
 
 
     /*******************
@@ -421,54 +489,48 @@ public class DataLayerMiles {
         return addInterest("guest", accountID, interest);
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+    public static void main(String[] args){
 
         Scanner reader = new Scanner(System.in);
 
         DataLayerMiles dl = new DataLayerMiles();
-//        DataLayerEvan dl = new DataLayerEvan();
 
-//        System.out.println("username: ");
-//        String user = reader.nextLine();
-//
-//        System.out.println("password: ");
-//        String pass = reader.nextLine();
-//
-//        System.out.println("database: ");
-//        String db = reader.nextLine();
-//
-//        dl.connect(user, pass, db);
-        dl.connect("root", "Pakeetanahman626285", "iste330group4");
+        System.out.println("username: ");
+        String user = reader.nextLine();
+
+        System.out.println("password: ");
+        String pass = reader.nextLine();
+
+        System.out.println("database: ");
+        String db = reader.nextLine();
+
+        dl.connect(user, pass, db);
 
         //test functions below
 
-//        dl.addFacultyInterest(1, "Java Coding");
-//        dl.addFacultyInterest(1, "Java Coding Again");
-//        dl.addFacultyInterest(1, "C# Programming");
-//        dl.addStudentInterest(3, "Biology");
+        dl.addFacultyInterest(1, "songs");
+        dl.addFacultyInterest(1, "trees");
+        dl.addFacultyInterest(1, "birds");
+        dl.addFacultyInterest(2, "songs");
+        dl.addFacultyInterest(2, "trees");
+        dl.addStudentInterest(3, "Biology");
 
-//        dl.getFacultyInterests(1).forEach(item -> System.out.println(item.getInterestID()));
+        dl.getFacultyInterests(1).forEach(item -> System.out.println(item));
 
-//        dl.removeFacultyInterest(2);
-//        dl.removeFacultyInterest(3);
-//        dl.removeFacultyInterest(4);
-//        dl.removeFacultyInterest(1);
+//        dl.removeFacultyInterest(2); //interest ID
 
-//        dl.addFacultyAbstract(1, "cool", "even cooler.");
-//        dl.addFacultyAbstract(1, "coolest", "even beans.");
-//        dl.addFacultyAbstract(1, "cooler", "even test.");
+        dl.addFacultyAbstract(1, "cool", "even cooler.");
+        dl.addFacultyAbstract(1, "coolest", "even beans.");
+        dl.addFacultyAbstract(1, "cooler", "even test.");
 
-//        dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
+        dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
 
-//        dl.removeFacultyAbstract(1);
+        dl.facultySearch("songs,trees").forEach(item -> System.out.println(item));
+
+//        dl.removeFacultyAbstract(1); //abstract ID
 
         System.out.println(dl.getContact(1));
-
-//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-//        messageDigest.update("password".getBytes());
-//        String hash = Base64.getEncoder().encodeToString(messageDigest.digest());
-
-//        System.out.println(hash);
+        System.out.println(dl.getOffice(1));
     }
 
 
