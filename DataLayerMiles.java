@@ -1,7 +1,9 @@
 package groupproject;
 
 import groupproject.objects.Abstract;
+import groupproject.objects.Contact;
 import groupproject.objects.Interest;
+import groupproject.objects.SearchRecord;
 
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
@@ -89,7 +91,7 @@ public class DataLayerMiles {
 
     private void SQLExceptionMsg(String e) {
 
-        System.out.println(">> SQLException caught\n>> " + e);
+        System.out.println(">> SQLException caught\n>>>> " + e);
     }
 
     /**
@@ -112,6 +114,62 @@ public class DataLayerMiles {
      * Interests (keyword) are a short phrase, or title. (ex. Backend Programming)
      */
 
+    /**
+     * SEARCH RECORDS THING
+     */
+
+//    public List<SearchRecord> matchingFacultyInterests(int accountID, String interestsStr) {
+//
+//        List<SearchRecord> searchRecords = new LinkedList<>();
+//
+//        try {
+//
+//            String[] interests = interestsStr.split(",");
+//
+//            String sql = "SELECT firstName, lastName FROM account WHERE roleID != 3 AND accountID != ? AND ";
+//
+//        }catch (SQLException e) {
+//
+//            SQLExceptionMsg(e.getMessage());
+//        }
+//
+//        return searchRecords;
+//    }
+
+
+    /*******************
+     * CONTACT SECTION
+     *******************/
+
+    public Contact getContact(int accountID) {
+
+        Contact contact = new Contact();
+
+        try {
+
+            String sql = "SELECT * FROM contact WHERE accountID = ?";
+
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, accountID);
+
+            this.rs = this.stmt.executeQuery();
+
+            if(this.rs.next()) {
+
+                contact.setAccountID(accountID);
+                contact.setEmail(this.rs.getString("email"));
+                contact.setPhone(this.rs.getString("phone"));
+            }
+
+            reset();
+
+        }catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return contact;
+    }
 
 
     /***************************
@@ -400,9 +458,11 @@ public class DataLayerMiles {
 //        dl.addFacultyAbstract(1, "coolest", "even beans.");
 //        dl.addFacultyAbstract(1, "cooler", "even test.");
 
-        dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
+//        dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
 
 //        dl.removeFacultyAbstract(1);
+
+        System.out.println(dl.getContact(1));
 
 //        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 //        messageDigest.update("password".getBytes());
