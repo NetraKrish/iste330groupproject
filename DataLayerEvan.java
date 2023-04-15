@@ -1,5 +1,5 @@
 package HW.GroupProject;
-// AUthors Evan Jurdan, 
+// AUthors Evan Jurdan, Miles Krassen
 
 import java.sql.*;
 import java.util.*;
@@ -356,6 +356,174 @@ public class DataLayerEvan {
                 System.out.println("Error!");
                 System.out.println("Error message is --> "+e);
            }
+    }
+
+    public void editOffice(int acID, String BuilNum, String offNum){
+        int affected = 0;
+        try{
+            Statement stmt = conn.
+                createStatement();;
+            PreparedStatement stmt3;
+            stmt3 = conn.prepareStatement("UPDATE office set building = ? , number = ? WHERE accountID = ? ");
+            stmt3.setString(1,BuilNum); 
+            stmt3.setString(2,offNum);      
+            stmt3.setInt(3,acID);   
+            affected = stmt3.executeUpdate();
+            System.out.print("\n "+affected+" record(s) updated\n");
+         }
+         catch(Exception e)
+            {
+                System.out.println("Error!");
+                System.out.println("Error message is --> "+e);
+           }
+    }
+
+    public void editAcc(int acID, String fNam,String lNam,String prefCon){
+        int affected = 0;
+        try{
+            Statement stmt = conn.
+                createStatement();;
+            PreparedStatement stmt3;
+            stmt3 = conn.prepareStatement("UPDATE account set firstName = ? , lastName = ? , preferredContact = ? WHERE accountID = ? ");
+            stmt3.setString(1,fNam); 
+            stmt3.setString(2,lNam);      
+            stmt3.setString(3,prefCon);
+            stmt3.setInt(4,acID);   
+            affected = stmt3.executeUpdate();
+            System.out.print("\n "+affected+" record(s) updated\n");
+         }
+         catch(Exception e)
+            {
+                System.out.println("Error!");
+                System.out.println("Error message is --> "+e);
+           }
+    }
+
+    public void editPas(int acID, String pass){
+        int affected = 0;
+        String Password = "";
+        
+        try{
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(pass.getBytes(StandardCharsets.UTF_8));
+        Password = Base64.getEncoder().encodeToString(md.digest());
+        }
+        catch(NoSuchAlgorithmException e){
+
+        }
+        try{
+            Statement stmt = conn.
+                createStatement();;
+            PreparedStatement stmt3;
+            stmt3 = conn.prepareStatement("UPDATE account set password = ? WHERE accountID = ? ");
+            stmt3.setString(1,Password); 
+            stmt3.setInt(2,acID);   
+            affected = stmt3.executeUpdate();
+            System.out.print("\n "+affected+" record(s) updated\n");
+         }
+         catch(Exception e)
+            {
+                System.out.println("Error!");
+                System.out.println("Error message is --> "+e);
+           }
+
+    }
+
+
+    public int addFacultyAbstract(int accountID, String title, String body) {
+        int effected = 0;
+        try{
+            String sql = "INSERT INTO abstract (title, body) VALUES (?,?)";
+            this.stmt = this.conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            this.stmt.setString(1, title);
+            this.stmt.setString(2, body);
+            this.stmt.executeUpdate();
+            this.rs = this.stmt.getGeneratedKeys();
+            int abstractID = -1;
+            if(this.rs.next()){
+                abstractID = this.rs.getInt(1);
+            }
+            reset();
+            if(abstractID == -1) return effected;
+            sql = "INSERT INTO faculty_abstract (accountID, abstractID) VALUES (?,?)";
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, accountID);
+            this.stmt.setInt(2, abstractID);
+            effected = this.stmt.executeUpdate();
+            reset();
+        }catch (SQLException e) {
+            SQLExceptionMsg(e.getMessage());
+        }
+        return effected;
+    }
+    public int removeFacultyAbstract(int abstractID) {
+        int effected = 0;
+        try{
+            String sql = "DELETE FROM abstract WHERE abstractID = ?";
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, abstractID);
+            effected = this.stmt.executeUpdate();
+            reset();
+        }catch (SQLException e) {
+            SQLExceptionMsg(e.getMessage());
+        }
+        return effected;
+    }
+    private int removeInterest(String role, int interestID) {
+        int effected = 0;
+        try {
+            String sql = "DELETE FROM " + role + "_interest WHERE interestID = ?";
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, interestID);
+            effected = this.stmt.executeUpdate();
+            reset();
+        }catch (SQLException e) {
+            SQLExceptionMsg(e.getMessage());
+        }
+        return effected;
+    }
+    public int removeStudentInterest(int interestID) {
+        return removeInterest("student", interestID);
+    }
+    public int removeFacultyInterest(int interestID) {
+        return removeInterest("faculty", interestID);
+    }
+    public int removeGuestInterest(int interestID) {
+        return removeInterest("guest", interestID);
+    }
+    private int addInterest(String role, int accountID, String interest) {
+        int effected = 0;
+        try{
+            String sql = "INSERT INTO " + role + "_interest (interest) VALUES (?)";
+            this.stmt = this.conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            this.stmt.setString(1, interest);
+            this.stmt.executeUpdate();
+            this.rs = this.stmt.getGeneratedKeys();
+            int interestID = -1;
+            if(this.rs.next()){
+                interestID = this.rs.getInt(1);
+            }
+            reset();
+            if(interestID == -1) return effected;
+            sql = "INSERT INTO account_" + role + "_interest (accountID, interestID) VALUES (?,?)";
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, accountID);
+            this.stmt.setInt(2, interestID);
+            effected = this.stmt.executeUpdate();
+            reset();
+        }catch (SQLException e) {
+            SQLExceptionMsg(e.getMessage());
+        }
+        return effected;
+    }
+    public int addStudentInterest(int accountID, String interest) {
+        return addInterest("student", accountID, interest);
+    }
+    public int addFacultyInterest(int accountID, String interest) {
+        return addInterest("faculty", accountID, interest);
+    }
+    public int addGuestInterest(int accountID, String interest) {
+        return addInterest("guest", accountID, interest);
     }
 
 
