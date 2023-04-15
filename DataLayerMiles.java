@@ -1,9 +1,14 @@
 package groupproject;
 
+import groupproject.objects.Abstract;
+import groupproject.objects.Interest;
+
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 import java.security.MessageDigest;
 
@@ -82,7 +87,7 @@ public class DataLayerMiles {
         }
     }
 
-    public void SQLExceptionMsg(String e) {
+    private void SQLExceptionMsg(String e) {
 
         System.out.println(">> SQLException caught\n>> " + e);
     }
@@ -106,6 +111,44 @@ public class DataLayerMiles {
      *
      * Interests (keyword) are a short phrase, or title. (ex. Backend Programming)
      */
+
+
+
+    /***************************
+     * FACULTY ABSTRACT SECTION
+     ***************************/
+
+    public List<Abstract> getFacultyAbstracts(int accountID) {
+
+        List<Abstract> abstracts = new LinkedList<>();
+
+        try{
+
+            String sql = "SELECT * FROM abstract JOIN faculty_abstract USING (abstractID) WHERE accountID = ?";
+
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, accountID);
+
+            this.rs = this.stmt.executeQuery();
+
+            while(this.rs.next()) {
+
+                abstracts.add(new Abstract(
+                        this.rs.getInt("abstractID"),
+                        this.rs.getString("title"),
+                        this.rs.getString("body")
+                ));
+            }
+
+            reset();
+
+        }catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return abstracts;
+    }
 
     public int addFacultyAbstract(int accountID, String title, String body) {
 
@@ -172,6 +215,56 @@ public class DataLayerMiles {
         }
 
         return effected;
+    }
+
+    /********************
+     * INTERESTS SECTION
+     ********************/
+
+    private List<Interest> getInterests(String role, int accountID) {
+
+        List<Interest> interests = new LinkedList<>();
+
+        try{
+
+            String sql = "SELECT * FROM " + role + "_interest JOIN account_" + role + "_interest USING (interestID) WHERE accountID = ?";
+
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, accountID);
+
+            this.rs = this.stmt.executeQuery();
+
+            while(this.rs.next()) {
+
+                interests.add(new Interest(
+                        this.rs.getInt("interestID"),
+                        this.rs.getString("interest")
+                ));
+            }
+
+            reset();
+
+        }catch (SQLException e){
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return interests;
+    }
+
+    public List<Interest> getFacultyInterests(int accountID) {
+
+        return getInterests("faculty", accountID);
+    }
+
+    public List<Interest> getStudentInterests(int accountID) {
+
+        return getInterests("student", accountID);
+    }
+
+    public List<Interest> getGuestInterests(int accountID) {
+
+        return getInterests("guest", accountID);
     }
 
     private int removeInterest(String role, int interestID) {
@@ -287,16 +380,28 @@ public class DataLayerMiles {
 //        String db = reader.nextLine();
 //
 //        dl.connect(user, pass, db);
+        dl.connect("root", "Pakeetanahman626285", "iste330group4");
 
         //test functions below
 
 //        dl.addFacultyInterest(1, "Java Coding");
+//        dl.addFacultyInterest(1, "Java Coding Again");
+//        dl.addFacultyInterest(1, "C# Programming");
 //        dl.addStudentInterest(3, "Biology");
 
-//        dl.removeStudentInterest(1);
+//        dl.getFacultyInterests(1).forEach(item -> System.out.println(item.getInterestID()));
+
+//        dl.removeFacultyInterest(2);
+//        dl.removeFacultyInterest(3);
+//        dl.removeFacultyInterest(4);
 //        dl.removeFacultyInterest(1);
 
 //        dl.addFacultyAbstract(1, "cool", "even cooler.");
+//        dl.addFacultyAbstract(1, "coolest", "even beans.");
+//        dl.addFacultyAbstract(1, "cooler", "even test.");
+
+        dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
+
 //        dl.removeFacultyAbstract(1);
 
 //        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
