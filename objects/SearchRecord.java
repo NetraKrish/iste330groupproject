@@ -14,6 +14,11 @@ public class SearchRecord {
         this.commonInterests = commonInterests;
     }
 
+    public SearchRecord(int accountID, String name) {
+        this.accountID = accountID;
+        this.name = name;
+    }
+
     public int getAccountID() {
         return accountID;
     }

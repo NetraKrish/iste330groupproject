@@ -474,21 +474,125 @@ public class iste330Group4DataLayer {
      * MILES KRASSEN CODE BELOW
      ***************************/
 
-    /***********************
-     * SEARCH RECORDS THING
-     ***********************/
+    /************************
+     * SEARCH RECORDS SECTION
+     ************************/
 
-    private List<SearchRecord> searchRecords(String role, String interestsInput) {
+    /**************************
+     * SEARCH FACULTY ABSTRACTS
+     **************************/
+
+    public List<SearchRecord> searchByFacultyAbstract(String input) {
+
+        List<SearchRecord> searchRecords = new LinkedList<>();
+
+        try{
+
+            String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a JOIN faculty_abstract USING (accountID) JOIN abstract USING (abstractID) WHERE LOWER(abstract.title) LIKE CONCAT('%', ?, '%') GROUP BY a.accountID";
+
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setString(1, input.toLowerCase().trim());
+
+            this.rs = this.stmt.executeQuery();
+
+            while(this.rs.next()) {
+
+                searchRecords.add(new SearchRecord(
+                        this.rs.getInt("accountID"),
+                        this.rs.getString("name")
+                ));
+            }
+
+            reset();
+
+        }catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return searchRecords;
+    }
+
+    /*****************
+     * SEARCH BY NAME
+     *****************/
+
+    private List<SearchRecord> searchByName(int roleID, String input) {
+
+        List<SearchRecord> searchRecords = new LinkedList<>();
+
+        try{
+
+            String[] explodedInput = input.toLowerCase().split(",");
+
+            for(int i = 0; i < explodedInput.length; i++) {
+
+                explodedInput[i] = explodedInput[i].trim();
+            }
+
+            String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a WHERE a.roleID = " + roleID + " AND ";
+
+            for(String param: explodedInput) {
+
+                sql += "LOWER(CONCAT(firstName, ' ', lastName)) LIKE CONCAT('%', ?, '%') OR ";
+            }
+
+            sql = sql.substring(0, sql.length() - 4);
+
+            this.stmt = this.conn.prepareStatement(sql);
+
+            for(int i = 1; i <= explodedInput.length; i++) {
+
+                this.stmt.setString(i, explodedInput[i - 1]);
+            }
+
+            this.rs = this.stmt.executeQuery();
+
+            while(this.rs.next()) {
+
+                searchRecords.add(new SearchRecord(
+                        this.rs.getInt("accountID"),
+                        this.rs.getString("name")
+                ));
+            }
+
+            reset();
+
+        }catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return searchRecords;
+    }
+
+    public List<SearchRecord> searchByFacultyName(String name) {
+
+        return searchByName(2, name);
+    }
+
+    public List<SearchRecord> searchByStudentName(String name) {
+
+        return searchByName(1, name);
+    }
+
+    /*******************
+     * SEARCH INTERESTS
+     *******************/
+
+    private List<SearchRecord> searchByInterests(String role, String input) {
 
         List<SearchRecord> searchRecords = new LinkedList<>();
 
         try {
 
-            String sql = "SELECT concat(a.firstName,', ' , a.lastName) as 'name', afi.accountID as 'accountID', group_concat(' ', fi.interest) AS 'commonInterests' FROM " + role + "_interest as fi JOIN account_" + role + "_interest as afi on fi.interestID=afi.interestID JOIN account as a on afi.accountID=a.accountID WHERE fi.interest IN (";
-            String[] interests = interestsInput.split(",");
+            String sql = "SELECT concat(a.firstName,', ' , a.lastName) as 'name', afi.accountID as 'accountID', group_concat(' ', fi.interest) AS 'commonInterests' FROM " + role + "_interest as fi JOIN account_" + role + "_interest as afi on fi.interestID=afi.interestID JOIN account as a on afi.accountID=a.accountID WHERE LOWER(fi.interest) IN (";
 
-            for(String interest : interests) {
+            String[] explodedInput = input.toLowerCase().split(",");
 
+            for(int i = 0; i < explodedInput.length; i++) {
+
+                explodedInput[i] = explodedInput[i].trim();
                 sql += "?,";
             }
 
@@ -497,9 +601,9 @@ public class iste330Group4DataLayer {
 
             this.stmt = this.conn.prepareStatement(sql);
 
-            for(int i = 1; i <= interests.length; i++) {
+            for(int i = 1; i <= explodedInput.length; i++) {
 
-                this.stmt.setString(i, interests[i - 1]);
+                this.stmt.setString(i, explodedInput[i - 1]);
             }
 
             this.rs = this.stmt.executeQuery();
@@ -523,14 +627,14 @@ public class iste330Group4DataLayer {
         return searchRecords;
     }
 
-    public List<SearchRecord> facultySearch(String interestsInput) {
+    public List<SearchRecord> searchByFacultyInterest(String interestsInput) {
 
-        return searchRecords("faculty", interestsInput);
+        return searchByInterests("faculty", interestsInput);
     }
 
-    public List<SearchRecord> studentSearch(String interestsInput) {
+    public List<SearchRecord> searchByStudentInterest(String interestsInput) {
 
-        return searchRecords("student", interestsInput);
+        return searchByInterests("student", interestsInput);
     }
 
     /*******************
@@ -895,13 +999,20 @@ public class iste330Group4DataLayer {
 
         dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
 
-        dl.facultySearch("songs,trees").forEach(item -> System.out.println(item));
-        dl.facultySearch("songs,trees,birds").forEach(item -> System.out.println(item));
-        dl.facultySearch("Biology").forEach(item -> System.out.println(item));
-        dl.facultySearch("trees").forEach(item -> System.out.println(item));
-        dl.studentSearch("songs,trees").forEach(item -> System.out.println(item));
-        dl.studentSearch("Biology").forEach(item -> System.out.println(item));
-        dl.studentSearch("Cars").forEach(item -> System.out.println(item));
+        dl.searchByFacultyInterest("songs,trees").forEach(item -> System.out.println(item));
+        dl.searchByFacultyInterest("songs,trees,birds").forEach(item -> System.out.println(item));
+        dl.searchByFacultyInterest("Biology").forEach(item -> System.out.println(item));
+        dl.searchByFacultyInterest("trees").forEach(item -> System.out.println(item));
+        dl.searchByStudentInterest("songs,trees").forEach(item -> System.out.println(item));
+        dl.searchByStudentInterest("Biology").forEach(item -> System.out.println(item));
+        dl.searchByStudentInterest("Cars").forEach(item -> System.out.println(item));
+
+        System.out.println("Search Faculty Abstract for 'cool'");
+        dl.searchByFacultyAbstract("cool").forEach(item -> System.out.println(item));
+        System.out.println("Search Faculty Name 'Con'");
+        dl.searchByFacultyName("Con").forEach(item -> System.out.println(item));
+
+
         //        dl.removeFacultyAbstract(1); //abstract ID
 
         System.out.println(dl.getContact(1));
