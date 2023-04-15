@@ -3,6 +3,10 @@ package HW.GroupProject;
 
 import java.sql.*;
 import java.util.*;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 public class DataLayerEvan {
 
     private Connection conn;
@@ -20,13 +24,11 @@ public class DataLayerEvan {
     }//end of constructor
 
 
-    // UTILITIES
-
     public boolean connect(String user, String pass, String db) {
 
         String url = "jdbc:mysql://localhost/" + db;
 
-        try {
+        try{
 
             Class.forName(DEFAULT_DRIVER);
             System.out.println(">> DEFAULT_DRIVER set");
@@ -87,15 +89,27 @@ public class DataLayerEvan {
         System.out.println(">> SQLException caught\n>> " + e);
     }
 
-    public int accID(String fNam, String lNam){
+    public int accID(String fNam, String lNam, String pass){
+        // finds accountID with first and last name as well as their password
         int acID = 0;
+        String Password = "";
+        
+        try{
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(pass.getBytes(StandardCharsets.UTF_8));
+        Password = Base64.getEncoder().encodeToString(md.digest());
+        }
+        catch(NoSuchAlgorithmException e){
+            System.out.println("Error Hashing");
+        }
     try {
 
-            String sql = "SELECT accountID from account WHERE firstName = ? AND lastName = ? LIMIT 1";
+            String sql = "SELECT accountID from account WHERE firstName = ? AND lastName = ? AND password = ? LIMIT 1";
 
             this.stmt = this.conn.prepareStatement(sql);
             this.stmt.setString(1, fNam);
             this.stmt.setString(2, lNam);
+            this.stmt.setString(3, Password);
             this.stmt.executeQuery();
             this.rs = this.stmt.getResultSet();
             if(this.rs.next()){   
@@ -107,12 +121,24 @@ public class DataLayerEvan {
                      return(acID);
     }
 
-    
+
     public void addTeachAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum,String BuilNum, String offNum){
         int affected = 0;
         int affected2 = 0;
         int affected3 = 0;
         int acID = 0; 
+        String Password = "";
+        
+        try{
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(pass.getBytes(StandardCharsets.UTF_8));
+        Password = Base64.getEncoder().encodeToString(md.digest());
+        }
+        catch(NoSuchAlgorithmException e){
+
+        }
+
+
         try{
             Statement stmt = conn.
              createStatement();;
@@ -120,7 +146,7 @@ public class DataLayerEvan {
             stmt1 = conn.prepareStatement("INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
             stmt1.setString(1,fNam);      
             stmt1.setString(2,lNam);   
-            stmt1.setString(3,pass);
+            stmt1.setString(3,Password);
             stmt1.setString(4,prefCon);
             stmt1.setInt(5,2);
             
@@ -182,10 +208,20 @@ public class DataLayerEvan {
    }
 
 
-   public void addStudAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum){
-    int affected = 0;
-    int affected3 = 0;
-    int acID = 0; 
+    public void addStudAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum){
+        int affected = 0;
+        int affected3 = 0;
+        int acID = 0; 
+        String Password = "";
+        
+        try{
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(pass.getBytes(StandardCharsets.UTF_8));
+        Password = Base64.getEncoder().encodeToString(md.digest());
+        }
+        catch(NoSuchAlgorithmException e){
+
+        }
     try{
         Statement stmt = conn.
          createStatement();;
@@ -193,7 +229,70 @@ public class DataLayerEvan {
         stmt1 = conn.prepareStatement("INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
         stmt1.setString(1,fNam);      
         stmt1.setString(2,lNam);   
-        stmt1.setString(3,pass);
+        stmt1.setString(3,Password);
+        stmt1.setString(4,prefCon);
+        stmt1.setInt(5,1);
+        
+        affected = stmt1.executeUpdate();
+        this.rs = stmt1.getGeneratedKeys();
+
+        if(this.rs.next()){
+            
+            acID = this.rs.getInt(1);
+        }
+
+        System.out.print("\n "+affected+" record(s) inserted\n");
+     }
+     catch(Exception e)
+        {
+            System.out.println("Error!");
+            System.out.println("Error message is --> "+e);
+       }
+
+       ////////////////get accountID
+       //System.out.println(acID);
+       ////////////////////
+       
+       try{
+        Statement stmt = conn.
+         createStatement();;
+        PreparedStatement stmt3;
+        stmt3 = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
+        stmt3.setInt(1,acID); 
+        stmt3.setString(2,emailAdd);      
+        stmt3.setString(3,PhoNum);   
+        affected3 = stmt3.executeUpdate();
+        System.out.print("\n "+affected3+" record(s) inserted\n");
+     }
+     catch(Exception e)
+        {
+            System.out.println("Error!");
+            System.out.println("Error message is --> "+e);
+       }
+   }
+
+    public void addPubAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum){
+    int affected = 0;
+    int affected3 = 0;
+    int acID = 0; 
+    String Password = "";
+        
+        try{
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(pass.getBytes(StandardCharsets.UTF_8));
+        Password = Base64.getEncoder().encodeToString(md.digest());
+        }
+        catch(NoSuchAlgorithmException e){
+
+        }
+    try{
+        Statement stmt = conn.
+         createStatement();;
+        PreparedStatement stmt1;
+        stmt1 = conn.prepareStatement("INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+        stmt1.setString(1,fNam);      
+        stmt1.setString(2,lNam);   
+        stmt1.setString(3,Password);
         stmt1.setString(4,prefCon);
         stmt1.setInt(5,1);
         
@@ -238,64 +337,26 @@ public class DataLayerEvan {
        }
    }
 
-   public void addPubAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum){
-    int affected = 0;
-    int affected3 = 0;
-    int acID = 0; 
-    try{
-        Statement stmt = conn.
-         createStatement();;
-        PreparedStatement stmt1;
-        stmt1 = conn.prepareStatement("INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-        stmt1.setString(1,fNam);      
-        stmt1.setString(2,lNam);   
-        stmt1.setString(3,pass);
-        stmt1.setString(4,prefCon);
-        stmt1.setInt(5,1);
-        
-        affected = stmt1.executeUpdate();
-        this.rs = stmt1.getGeneratedKeys();
 
-        if(this.rs.next()){
-            
-            acID = this.rs.getInt(1);
-        }
-
-        System.out.print("\n "+affected+" record(s) inserted\n");
-     }
-     catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-       }
-
-       ////////////////get accountID
-       
-       System.out.println(acID);
-
-
-       ////////////////////
-       
-       try{
-        Statement stmt = conn.
-         createStatement();;
-        PreparedStatement stmt3;
-        stmt3 = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
-        stmt3.setInt(1,acID); 
-        stmt3.setString(2,emailAdd);      
-        stmt3.setString(3,PhoNum);   
-        affected3 = stmt3.executeUpdate();
-        System.out.print("\n "+affected3+" record(s) inserted\n");
-     }
-     catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-       }
-   }
-
-
-
+    public void editContact(int acID, String emailAdd,String PhoNum){
+        int affected = 0;
+        try{
+            Statement stmt = conn.
+                createStatement();;
+            PreparedStatement stmt3;
+            stmt3 = conn.prepareStatement("UPDATE contact set email = ? , phone = ? WHERE accountID = ? ");
+            stmt3.setString(1,emailAdd); 
+            stmt3.setString(2,PhoNum);      
+            stmt3.setInt(3,acID);   
+            affected = stmt3.executeUpdate();
+            System.out.print("\n "+affected+" record(s) updated\n");
+         }
+         catch(Exception e)
+            {
+                System.out.println("Error!");
+                System.out.println("Error message is --> "+e);
+           }
+    }
 
 
 
