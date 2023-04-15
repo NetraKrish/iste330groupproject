@@ -378,6 +378,58 @@ public class DataLayerEvan {
            }
     }
 
+    public void editAcc(int acID, String fNam,String lNam,String prefCon){
+        int affected = 0;
+        try{
+            Statement stmt = conn.
+                createStatement();;
+            PreparedStatement stmt3;
+            stmt3 = conn.prepareStatement("UPDATE account set firstName = ? , lastName = ? , preferredContact = ? WHERE accountID = ? ");
+            stmt3.setString(1,fNam); 
+            stmt3.setString(2,lNam);      
+            stmt3.setString(3,prefCon);
+            stmt3.setInt(4,acID);   
+            affected = stmt3.executeUpdate();
+            System.out.print("\n "+affected+" record(s) updated\n");
+         }
+         catch(Exception e)
+            {
+                System.out.println("Error!");
+                System.out.println("Error message is --> "+e);
+           }
+    }
+
+    public void editPas(int acID, String pass){
+        int affected = 0;
+        String Password = "";
+        
+        try{
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        md.update(pass.getBytes(StandardCharsets.UTF_8));
+        Password = Base64.getEncoder().encodeToString(md.digest());
+        }
+        catch(NoSuchAlgorithmException e){
+
+        }
+        try{
+            Statement stmt = conn.
+                createStatement();;
+            PreparedStatement stmt3;
+            stmt3 = conn.prepareStatement("UPDATE account set password = ? WHERE accountID = ? ");
+            stmt3.setString(1,Password); 
+            stmt3.setInt(2,acID);   
+            affected = stmt3.executeUpdate();
+            System.out.print("\n "+affected+" record(s) updated\n");
+         }
+         catch(Exception e)
+            {
+                System.out.println("Error!");
+                System.out.println("Error message is --> "+e);
+           }
+
+    }
+
+
     public int addFacultyAbstract(int accountID, String title, String body) {
         int effected = 0;
         try{
