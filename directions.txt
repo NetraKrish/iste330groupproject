@@ -5,6 +5,8 @@ run main method within the iste330Group4DataLayer.java
 There are pre-done methods there, make sure you setup our database on localhost!
 Database file: iste330group4.sql
 
+make sure your package is "groupproject"
+
 Feel free to mess with some of the tester functions inside the main method.
 
 IF YOU RUN MULTIPLE TIMES, DO COMMENT OUT THE METHODS THAT "ADD" ITEMS OR YOU WILL GET DUPLICATES!
