@@ -858,7 +858,7 @@ public class iste330Group4DataLayer {
 
         Scanner reader = new Scanner(System.in);
 
-        DataLayerMiles dl = new DataLayerMiles();
+        iste330Group4DataLayer dl = new iste330Group4DataLayer();
 
         System.out.println("username: ");
         String user = reader.nextLine();
@@ -866,7 +866,7 @@ public class iste330Group4DataLayer {
         System.out.println("password: ");
         String pass = reader.nextLine();
 
-        System.out.println("database: ");
+        System.out.println("database (TYPE:'iste330group4'): ");
         String db = reader.nextLine();
 
         dl.connect(user, pass, db);
