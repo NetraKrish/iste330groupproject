@@ -1,12 +1,16 @@
 package groupproject;
 
-// AUthors Evan Jurdan, Miles Krassen, Tim Lonergan, Kaszuba Daniel, Krassen Miles, Krishnan Netra, Landers Seth
 
+
+// AUthors Evan Jurdan, Miles Krassen, Tim Lonergan, Kaszuba Daniel, Krassen Miles, Krishnan Netra, Landers Seth
 
 import groupproject.objects.*;
 
 import java.sql.*;
 import java.util.*;
+
+import javax.management.relation.Role;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -17,19 +21,19 @@ public class iste330Group4DataLayer {
     private PreparedStatement stmt;
     private String sql;
     private int col;
+    
 
     final String DEFAULT_DRIVER = "com.mysql.cj.jdbc.Driver";
 
-    public iste330Group4DataLayer(){
+    public iste330Group4DataLayer() {
         this.conn = null;
         this.rs = null;
         this.stmt = null;
-    }//end of constructor
-
+    }// end of constructor
 
     public boolean connect(String user, String pass, String db) {
 
-        String url = "jdbc:mysql://localhost/" + db;
+        String url = "jdbc:mysql://localhost/" + db +"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
         try {
 
@@ -39,12 +43,12 @@ public class iste330Group4DataLayer {
             this.conn = DriverManager.getConnection(url, user, pass);
             System.out.println(">> Database connected.");
 
-        }catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
 
             System.out.println(">> Database connection failed.\n>> " + e);
             System.exit(0);
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             System.out.println(">> Database connection failed.\n>> " + e);
             System.exit(0);
@@ -52,17 +56,17 @@ public class iste330Group4DataLayer {
 
         return (this.conn != null);
     }
-
+//resets db instances
     public void reset() {
 
         try {
-            if(this.rs != null)
+            if (this.rs != null)
                 this.rs.close();
 
-            if(this.stmt != null)
+            if (this.stmt != null)
                 this.stmt.close();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             System.out.println(">> DataLayer:reset(): failed\n>> " + e);
         }
@@ -74,12 +78,12 @@ public class iste330Group4DataLayer {
 
             reset();
 
-            if(this.conn != null)
+            if (this.conn != null)
                 this.conn.close();
 
             System.out.println(">> Database connection closed.");
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             System.out.println(">> DataLayer:close(): failed\n>> " + e);
         }
@@ -90,22 +94,30 @@ public class iste330Group4DataLayer {
         System.out.println(">> SQLException caught\n>>>> " + e);
     }
 
-///////////////////////////////////////////
-//Evan's code, sorry for poor documentation
-
-    public int accID(String fNam, String lNam, String pass){
-        // finds accountID with first and last name as well as their password
-        int acID = 0;
+    public String hash(String pass) {
         String Password = "";
-
-        try{
+        try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(pass.getBytes(StandardCharsets.UTF_8));
             Password = Base64.getEncoder().encodeToString(md.digest());
+            
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println(e);
         }
-        catch(NoSuchAlgorithmException e){
-            System.out.println("Error Hashing");
-        }
+        return Password;
+
+    }
+
+    ///////////////////////////////////////////
+    // Evan's code, sorry for poor documentation
+
+    public int accID(String fNam, String lNam, String pass) {
+        // finds accountID with first and last name as well as their password
+        int acID = 0;
+        String Password = "";
+        Password = hash(pass);
+     
+
         try {
 
             String sql = "SELECT accountID from account WHERE firstName = ? AND lastName = ? AND password = ? LIMIT 1";
@@ -116,359 +128,188 @@ public class iste330Group4DataLayer {
             this.stmt.setString(3, Password);
             this.stmt.executeQuery();
             this.rs = this.stmt.getResultSet();
-            if(this.rs.next()){
+            if (this.rs.next()) {
                 acID = this.rs.getInt("accountID");
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             SQLExceptionMsg(e.getMessage());
         }
-        return(acID);
+        reset();
+        return (acID);
+
+    }
+   /********************
+     * CREATE ACCOUNT
+     ********************/
+    public void addAcc(String fNam, String lNam, String pass, String prefCon, String emailAdd, String PhoNum,
+    String BuilNum, String offNum, int Role) {
+int affected = 0;
+int affected2 = 0;
+int affected3 = 0;
+int acID = 0;
+String Password = "";
+Password = hash(pass);
+
+
+try {
+
+    stmt = conn.prepareStatement(
+            "INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)",
+            Statement.RETURN_GENERATED_KEYS);
+    stmt.setString(1, fNam);
+    stmt.setString(2, lNam);
+    stmt.setString(3, Password);
+    stmt.setString(4, prefCon);
+    stmt.setInt(5, Role);
+
+    affected = stmt.executeUpdate();
+    // gets any auto-generated keys after update
+    this.rs = stmt.getGeneratedKeys();
+
+    if (this.rs.next()) {
+
+        acID = this.rs.getInt(1);
     }
 
-    public void addTeachAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum,String BuilNum, String offNum){
+    System.out.print("\n " + affected + " record(s) inserted\n");
+} catch (Exception e) {
+    System.out.println("Error!");
+    System.out.println("Error message is --> " + e);
+}
+reset();
+
+//////////////// get accountID
+
+System.out.println(acID);
+
+/********************
+     * FACULTY SECTION
+     ********************/
+//if role belongs to faculty proceed
+if (Role == 2){
+////////////////////
+// adds office details for created faculty
+try {
+
+   
+    stmt = conn
+            .prepareStatement("INSERT INTO iste330group4.office(accountID, building, number) VALUES (?,?,?)");
+    stmt.setInt(1, acID);
+    stmt.setString(2, BuilNum);
+    stmt.setString(3, offNum);
+    affected2 = stmt.executeUpdate();
+    System.out.print("\n " + affected2 + " record(s) inserted\n");
+} catch (Exception e) {
+    System.out.println("Error!");
+    System.out.println("Error message is --> " + e);
+}
+reset();
+// adds contscts details for created faculty
+try {
+
+    
+    stmt = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
+    stmt.setInt(1, acID);
+    stmt.setString(2, emailAdd);
+    stmt.setString(3, PhoNum);
+    affected3 = stmt.executeUpdate();
+    System.out.print("\n " + affected3 + " record(s) inserted\n");
+} catch (Exception e) {
+    System.out.println("Error!");
+    System.out.println("Error message is --> " + e);
+}
+reset();
+}
+}
+
+
+  /********************
+     * EDIT CONTACT
+     ********************/
+    public void editContact(int acID, String emailAdd, String PhoNum) {
         int affected = 0;
-        int affected2 = 0;
-        int affected3 = 0;
-        int acID = 0;
-        String Password = "";
-
-        try{
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(pass.getBytes(StandardCharsets.UTF_8));
-            Password = Base64.getEncoder().encodeToString(md.digest());
-        }
-        catch(NoSuchAlgorithmException e){
-
-        }
-
-
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt1;
-            stmt1 = conn.prepareStatement("INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-            stmt1.setString(1,fNam);
-            stmt1.setString(2,lNam);
-            stmt1.setString(3,Password);
-            stmt1.setString(4,prefCon);
-            stmt1.setInt(5,2);
-
-            affected = stmt1.executeUpdate();
-            this.rs = stmt1.getGeneratedKeys();
-
-            if(this.rs.next()){
-
-                acID = this.rs.getInt(1);
-            }
-
-            System.out.print("\n "+affected+" record(s) inserted\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-
-        ////////////////get accountID
-
-        System.out.println(acID);
-
-
-        ////////////////////
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt2;
-            stmt2 = conn.prepareStatement("INSERT INTO iste330group4.office(accountID, building, number) VALUES (?,?,?)");
-            stmt2.setInt(1,acID);
-            stmt2.setString(2,BuilNum);
-            stmt2.setString(3,offNum);
-            affected2 = stmt2.executeUpdate();
-            System.out.print("\n "+affected2+" record(s) inserted\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt3;
-            stmt3 = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
-            stmt3.setInt(1,acID);
-            stmt3.setString(2,emailAdd);
-            stmt3.setString(3,PhoNum);
-            affected3 = stmt3.executeUpdate();
-            System.out.print("\n "+affected3+" record(s) inserted\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-
-    }
-
-    public void addStudAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum){
-        int affected = 0;
-        int affected3 = 0;
-        int acID = 0;
-        String Password = "";
-
-        try{
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(pass.getBytes(StandardCharsets.UTF_8));
-            Password = Base64.getEncoder().encodeToString(md.digest());
-        }
-        catch(NoSuchAlgorithmException e){
-
-        }
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt1;
-            stmt1 = conn.prepareStatement("INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-            stmt1.setString(1,fNam);
-            stmt1.setString(2,lNam);
-            stmt1.setString(3,Password);
-            stmt1.setString(4,prefCon);
-            stmt1.setInt(5,1);
-
-            affected = stmt1.executeUpdate();
-            this.rs = stmt1.getGeneratedKeys();
-
-            if(this.rs.next()){
-
-                acID = this.rs.getInt(1);
-            }
-
-            System.out.print("\n "+affected+" record(s) inserted\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-
-        ////////////////get accountID
-        //System.out.println(acID);
-        ////////////////////
-
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt3;
-            stmt3 = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
-            stmt3.setInt(1,acID);
-            stmt3.setString(2,emailAdd);
-            stmt3.setString(3,PhoNum);
-            affected3 = stmt3.executeUpdate();
-            System.out.print("\n "+affected3+" record(s) inserted\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-    }
-
-    public void addPubAcc(String fNam,String lNam,String pass,String prefCon,String emailAdd,String PhoNum){
-        int affected = 0;
-        int affected3 = 0;
-        int acID = 0;
-        String Password = "";
-
-        try{
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(pass.getBytes(StandardCharsets.UTF_8));
-            Password = Base64.getEncoder().encodeToString(md.digest());
-        }
-        catch(NoSuchAlgorithmException e){
-
-        }
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt1;
-            stmt1 = conn.prepareStatement("INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-            stmt1.setString(1,fNam);
-            stmt1.setString(2,lNam);
-            stmt1.setString(3,Password);
-            stmt1.setString(4,prefCon);
-            stmt1.setInt(5,1);
-
-            affected = stmt1.executeUpdate();
-            this.rs = stmt1.getGeneratedKeys();
-
-            if(this.rs.next()){
-
-                acID = this.rs.getInt(1);
-            }
-
-            System.out.print("\n "+affected+" record(s) inserted\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-
-        ////////////////get accountID
-
-        System.out.println(acID);
-
-
-        ////////////////////
-
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt3;
-            stmt3 = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
-            stmt3.setInt(1,acID);
-            stmt3.setString(2,emailAdd);
-            stmt3.setString(3,PhoNum);
-            affected3 = stmt3.executeUpdate();
-            System.out.print("\n "+affected3+" record(s) inserted\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-    }
-
-    public void editContact(int acID, String emailAdd,String PhoNum){
-        int affected = 0;
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt3;
-            stmt3 = conn.prepareStatement("UPDATE contact set email = ? , phone = ? WHERE accountID = ? ");
-            stmt3.setString(1,emailAdd);
-            stmt3.setString(2,PhoNum);
-            stmt3.setInt(3,acID);
-            affected = stmt3.executeUpdate();
-            System.out.print("\n "+affected+" record(s) updated\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-    }
-
-    public void editOffice(int acID, String BuilNum, String offNum){
-        int affected = 0;
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt3;
-            stmt3 = conn.prepareStatement("UPDATE office set building = ? , number = ? WHERE accountID = ? ");
-            stmt3.setString(1,BuilNum);
-            stmt3.setString(2,offNum);
-            stmt3.setInt(3,acID);
-            affected = stmt3.executeUpdate();
-            System.out.print("\n "+affected+" record(s) updated\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-    }
-
-    public void editAcc(int acID, String fNam,String lNam,String prefCon){
-        int affected = 0;
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt3;
-            stmt3 = conn.prepareStatement("UPDATE account set firstName = ? , lastName = ? , preferredContact = ? WHERE accountID = ? ");
-            stmt3.setString(1,fNam);
-            stmt3.setString(2,lNam);
-            stmt3.setString(3,prefCon);
-            stmt3.setInt(4,acID);
-            affected = stmt3.executeUpdate();
-            System.out.print("\n "+affected+" record(s) updated\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-    }
-
-    public void editPas(int acID, String pass){
-        int affected = 0;
-        String Password = "";
-
-        try{
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(pass.getBytes(StandardCharsets.UTF_8));
-            Password = Base64.getEncoder().encodeToString(md.digest());
-        }
-        catch(NoSuchAlgorithmException e){
-
-        }
-        try{
-            Statement stmt = conn.
-                    createStatement();;
-            PreparedStatement stmt3;
-            stmt3 = conn.prepareStatement("UPDATE account set password = ? WHERE accountID = ? ");
-            stmt3.setString(1,Password);
-            stmt3.setInt(2,acID);
-            affected = stmt3.executeUpdate();
-            System.out.print("\n "+affected+" record(s) updated\n");
-        }
-        catch(Exception e)
-        {
-            System.out.println("Error!");
-            System.out.println("Error message is --> "+e);
-        }
-
-    }
-
-    public String facultySearchOld(String interestsInput){
-        String ret = "";
-        String sql = "SELECT concat(a.firstName,', ' , a.lastName) as 'Name',afi.accountID as 'Account ID', count(fi.interest) AS 'Interests in Common', group_concat(' ', fi.interest) AS 'Interests' FROM faculty_interest as fi JOIN account_faculty_interest as afi on fi.interestID=afi.interestID JOIN account as a on afi.accountID=a.accountID WHERE fi.interest IN (";
-        String[] interests = interestsInput.split(",");
-        for(String interest : interests){
-            sql += "?,";
-        }
-
-        sql = sql.substring(0, sql.length() - 1);
-        sql += ") group by afi.accountID order by count(fi.interest) desc";
         try {
-            this.stmt = this.conn.prepareStatement(sql);
-            // int x = 1;
-            // for(String interest : interests){
-            //     this.stmt.setString(1, interest);
-            //     x++;
-            // }
-            System.out.println(interests);
-            for(int i = 0; i < interests.length; i++) {
 
-                this.stmt.setString((i+1), interests[i]);
-            }
-
-
-            this.stmt.executeQuery();
-            this.rs = this.stmt.getResultSet();
-            while (this.rs.next()) {
-                ret += this.rs.getString("Name")+" | "+this.rs.getString("Account ID")+" | "+this.rs.getString("Interests in Common")+" | "+this.rs.getString("Interests")+"\n";
-
-            }
-        }catch (SQLException e) {
-            SQLExceptionMsg(e.getMessage());
+            stmt = conn.prepareStatement("UPDATE contact set email = ? , phone = ? WHERE accountID = ? ");
+            stmt.setString(1, emailAdd);
+            stmt.setString(2, PhoNum);
+            stmt.setInt(3, acID);
+            affected = stmt.executeUpdate();
+            System.out.print("\n " + affected + " record(s) updated\n");
+        } catch (Exception e) {
+            System.out.println("Error!");
+            System.out.println("Error message is --> " + e);
         }
-
-
-        return(ret);
+        reset();
     }
 
-/////////////////////////////////
+    /********************
+     * EDIT OFFICE DETAILS
+     ********************/
+    public void editOffice(int acID, String BuilNum, String offNum) {
+        int affected = 0;
+        try {
+
+            stmt = conn.prepareStatement("UPDATE office set building = ? , number = ? WHERE accountID = ? ");
+            stmt.setString(1, BuilNum);
+            stmt.setString(2, offNum);
+            stmt.setInt(3, acID);
+            affected = stmt.executeUpdate();
+            System.out.print("\n " + affected + " record(s) updated\n");
+        } catch (Exception e) {
+            System.out.println("Error!");
+            System.out.println("Error message is --> " + e);
+        }
+        reset();
+    }
+
+    /********************
+     * EDIT ACC DETAILS
+     ********************/
+    public void editAcc(int acID, String fNam, String lNam, String prefCon) {
+        int affected = 0;
+        try {
+
+            stmt = conn.prepareStatement(
+                    "UPDATE account set firstName = ? , lastName = ? , preferredContact = ? WHERE accountID = ? ");
+            stmt.setString(1, fNam);
+            stmt.setString(2, lNam);
+            stmt.setString(3, prefCon);
+            stmt.setInt(4, acID);
+            affected = stmt.executeUpdate();
+            System.out.print("\n " + affected + " record(s) updated\n");
+        } catch (Exception e) {
+            System.out.println("Error!");
+            System.out.println("Error message is --> " + e);
+        }
+        reset();
+    }
+    /********************
+     * PASSWORD CHANGE
+     ********************/
+    public void editPas(int acID, String pass) {
+        int affected = 0;
+        String Password = "";
+
+        Password = hash(pass);
+     
+        try {
+
+            
+            stmt = conn.prepareStatement("UPDATE account set password = ? WHERE accountID = ? ");
+            stmt.setString(1, Password);
+            stmt.setInt(2, acID);
+            affected = stmt.executeUpdate();
+            System.out.print("\n " + affected + " record(s) updated\n");
+        } catch (Exception e) {
+            System.out.println("Error!");
+            System.out.println("Error message is --> " + e);
+        }
+        reset();
+    }
+
+
+    /////////////////////////////////
 
     /***************************
      * MILES KRASSEN CODE BELOW
@@ -486,7 +327,7 @@ public class iste330Group4DataLayer {
 
         List<SearchRecord> searchRecords = new LinkedList<>();
 
-        try{
+        try {
 
             String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a JOIN faculty_abstract USING (accountID) JOIN abstract USING (abstractID) WHERE LOWER(abstract.title) LIKE CONCAT('%', ?, '%') GROUP BY a.accountID";
 
@@ -495,17 +336,16 @@ public class iste330Group4DataLayer {
 
             this.rs = this.stmt.executeQuery();
 
-            while(this.rs.next()) {
+            while (this.rs.next()) {
 
                 searchRecords.add(new SearchRecord(
                         this.rs.getInt("accountID"),
-                        this.rs.getString("name")
-                ));
+                        this.rs.getString("name")));
             }
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -521,18 +361,19 @@ public class iste330Group4DataLayer {
 
         List<SearchRecord> searchRecords = new LinkedList<>();
 
-        try{
+        try {
 
-            String[] explodedInput = input.toLowerCase().split(",");
+            String[] explodedInput = input.toLowerCase().split("\\s+");
 
-            for(int i = 0; i < explodedInput.length; i++) {
+            for (int i = 0; i < explodedInput.length; i++) {
 
                 explodedInput[i] = explodedInput[i].trim();
             }
 
-            String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a WHERE a.roleID = " + roleID + " AND ";
+            String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a WHERE a.roleID = "
+                    + roleID + " AND ";
 
-            for(String param: explodedInput) {
+            for (String param : explodedInput) {
 
                 sql += "LOWER(CONCAT(firstName, ' ', lastName)) LIKE CONCAT('%', ?, '%') OR ";
             }
@@ -541,24 +382,23 @@ public class iste330Group4DataLayer {
 
             this.stmt = this.conn.prepareStatement(sql);
 
-            for(int i = 1; i <= explodedInput.length; i++) {
+            for (int i = 1; i <= explodedInput.length; i++) {
 
                 this.stmt.setString(i, explodedInput[i - 1]);
             }
 
             this.rs = this.stmt.executeQuery();
 
-            while(this.rs.next()) {
+            while (this.rs.next()) {
 
                 searchRecords.add(new SearchRecord(
                         this.rs.getInt("accountID"),
-                        this.rs.getString("name")
-                ));
+                        this.rs.getString("name")));
             }
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -586,11 +426,13 @@ public class iste330Group4DataLayer {
 
         try {
 
-            String sql = "SELECT concat(a.firstName,', ' , a.lastName) as 'name', afi.accountID as 'accountID', group_concat(' ', fi.interest) AS 'commonInterests' FROM " + role + "_interest as fi JOIN account_" + role + "_interest as afi on fi.interestID=afi.interestID JOIN account as a on afi.accountID=a.accountID WHERE LOWER(fi.interest) IN (";
+            String sql = "SELECT concat(a.firstName,', ' , a.lastName) as 'name', afi.accountID as 'accountID', group_concat(' ', fi.interest) AS 'commonInterests' FROM "
+                    + role + "_interest as fi JOIN account_" + role
+                    + "_interest as afi on fi.interestID=afi.interestID JOIN account as a on afi.accountID=a.accountID WHERE LOWER(fi.interest) IN (";
 
             String[] explodedInput = input.toLowerCase().split(",");
 
-            for(int i = 0; i < explodedInput.length; i++) {
+            for (int i = 0; i < explodedInput.length; i++) {
 
                 explodedInput[i] = explodedInput[i].trim();
                 sql += "?,";
@@ -601,25 +443,24 @@ public class iste330Group4DataLayer {
 
             this.stmt = this.conn.prepareStatement(sql);
 
-            for(int i = 1; i <= explodedInput.length; i++) {
+            for (int i = 1; i <= explodedInput.length; i++) {
 
                 this.stmt.setString(i, explodedInput[i - 1]);
             }
 
             this.rs = this.stmt.executeQuery();
 
-            while(this.rs.next()) {
+            while (this.rs.next()) {
 
                 searchRecords.add(new SearchRecord(
                         this.rs.getInt("accountID"),
                         this.rs.getString("name"),
-                        this.rs.getString("commonInterests")
-                ));
+                        this.rs.getString("commonInterests")));
             }
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -654,7 +495,7 @@ public class iste330Group4DataLayer {
 
             this.rs = this.stmt.executeQuery();
 
-            if(this.rs.next()) {
+            if (this.rs.next()) {
 
                 office.setAccountID(accountID);
                 office.setBuilding(this.rs.getString("building"));
@@ -663,14 +504,13 @@ public class iste330Group4DataLayer {
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
 
         return office;
     }
-
 
     /*******************
      * CONTACT SECTION
@@ -689,7 +529,7 @@ public class iste330Group4DataLayer {
 
             this.rs = this.stmt.executeQuery();
 
-            if(this.rs.next()) {
+            if (this.rs.next()) {
 
                 contact.setAccountID(accountID);
                 contact.setEmail(this.rs.getString("email"));
@@ -698,14 +538,13 @@ public class iste330Group4DataLayer {
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
 
         return contact;
     }
-
 
     /***************************
      * FACULTY ABSTRACT SECTION
@@ -715,7 +554,7 @@ public class iste330Group4DataLayer {
 
         List<Abstract> abstracts = new LinkedList<>();
 
-        try{
+        try {
 
             String sql = "SELECT * FROM abstract JOIN faculty_abstract USING (abstractID) WHERE accountID = ?";
 
@@ -724,18 +563,17 @@ public class iste330Group4DataLayer {
 
             this.rs = this.stmt.executeQuery();
 
-            while(this.rs.next()) {
+            while (this.rs.next()) {
 
                 abstracts.add(new Abstract(
                         this.rs.getInt("abstractID"),
                         this.rs.getString("title"),
-                        this.rs.getString("body")
-                ));
+                        this.rs.getString("body")));
             }
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -747,7 +585,7 @@ public class iste330Group4DataLayer {
 
         int effected = 0;
 
-        try{
+        try {
 
             String sql = "INSERT INTO abstract (title, body) VALUES (?,?)";
 
@@ -760,14 +598,15 @@ public class iste330Group4DataLayer {
 
             int abstractID = -1;
 
-            if(this.rs.next()){
+            if (this.rs.next()) {
 
                 abstractID = this.rs.getInt(1);
             }
 
             reset();
 
-            if(abstractID == -1) return effected;
+            if (abstractID == -1)
+                return effected;
 
             sql = "INSERT INTO faculty_abstract (accountID, abstractID) VALUES (?,?)";
 
@@ -779,7 +618,7 @@ public class iste330Group4DataLayer {
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -791,7 +630,7 @@ public class iste330Group4DataLayer {
 
         int effected = 0;
 
-        try{
+        try {
 
             String sql = "DELETE FROM abstract WHERE abstractID = ?";
 
@@ -802,7 +641,7 @@ public class iste330Group4DataLayer {
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -818,26 +657,26 @@ public class iste330Group4DataLayer {
 
         List<Interest> interests = new LinkedList<>();
 
-        try{
+        try {
 
-            String sql = "SELECT * FROM " + role + "_interest JOIN account_" + role + "_interest USING (interestID) WHERE accountID = ?";
+            String sql = "SELECT * FROM " + role + "_interest JOIN account_" + role
+                    + "_interest USING (interestID) WHERE accountID = ?";
 
             this.stmt = this.conn.prepareStatement(sql);
             this.stmt.setInt(1, accountID);
 
             this.rs = this.stmt.executeQuery();
 
-            while(this.rs.next()) {
+            while (this.rs.next()) {
 
                 interests.add(new Interest(
                         this.rs.getInt("interestID"),
-                        this.rs.getString("interest")
-                ));
+                        this.rs.getString("interest")));
             }
 
             reset();
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -875,7 +714,7 @@ public class iste330Group4DataLayer {
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -902,7 +741,7 @@ public class iste330Group4DataLayer {
 
         int effected = 0;
 
-        try{
+        try {
 
             String sql = "INSERT INTO " + role + "_interest (interest) VALUES (?)";
 
@@ -914,14 +753,15 @@ public class iste330Group4DataLayer {
 
             int interestID = -1;
 
-            if(this.rs.next()){
+            if (this.rs.next()) {
 
                 interestID = this.rs.getInt(1);
             }
 
             reset();
 
-            if(interestID == -1) return effected;
+            if (interestID == -1)
+                return effected;
 
             sql = "INSERT INTO account_" + role + "_interest (accountID, interestID) VALUES (?,?)";
 
@@ -933,7 +773,7 @@ public class iste330Group4DataLayer {
 
             reset();
 
-        }catch (SQLException e) {
+        } catch (SQLException e) {
 
             SQLExceptionMsg(e.getMessage());
         }
@@ -973,11 +813,13 @@ public class iste330Group4DataLayer {
 
         dl.connect(user, pass, db);
 
-        //test functions below
-        dl.addTeachAcc("john", "constantine", "yobro", "phone", "Johnny@this.dontmatter", "9999999", "somewhere", "over the rainbow");
-        dl.addTeachAcc("sarah", "connor", "johnconnor", "in person visit", "3000@this.dontmatter", "55125851", "bunker", "z892e");
-        dl.addStudAcc("Evan", "Jurdan", "Meow", "phone", "e@some.com", "my#");
-        dl.addPubAcc("harry", "Styles", "song", "email", "AAAA@A.com", "908264348");
+        // test functions below
+        dl.addAcc("john", "constantine", "yobro", "phone", "Johnny@this.dontmatter", "9999999", "somewhere",
+                "over the rainbow",2);
+        dl.addAcc("sarah", "connor", "johnconnor", "in person visit", "3000@this.dontmatter", "55125851", "bunker",
+                "z892e",2);
+        dl.addAcc("Evan", "Jurdan", "Meow", "phone", "e@some.com", "my#",null,null,1);
+        dl.addAcc("harry", "Styles", "song", "email", "AAAA@A.com", "908264348",null,null,3);
 
         dl.addStudentInterest(3, "Biology");
         dl.addStudentInterest(3, "Cars");
@@ -989,13 +831,13 @@ public class iste330Group4DataLayer {
 
         dl.getFacultyInterests(1).forEach(item -> System.out.println(item));
 
-//        dl.removeFacultyInterest(2); //interest ID
+        // dl.removeFacultyInterest(2); //interest ID
 
         dl.addFacultyAbstract(1, "cool", "even cooler.");
         dl.addFacultyAbstract(1, "coolest", "even beans.");
         dl.addFacultyAbstract(1, "cooler", "even test.");
-        dl.addFacultyAbstract(1, "Hey Ho", "Hey! Come merry dol! derry dol! My darling! Light goes the weather-wind and the feathered starling. Down along under Hill, shining in the sunlight, Waiting on the doorstep for the cold starlight, There my pretty lady is, River-woman's daughter, Slender as the willow-wand, clearer than the water. Old Tom Bombadil water-lilies bringing Comes hopping home again. Can you hear him singing? Hey! Come merry dol! derry dol! and merry-o! Goldberry, Goldberry, merry yellow berry-o! Poor old Willow-man, you tuck your roots away! Tom's in a hurry now. Evening will follow day. Tom's going home again water-lilies bringing. Hey! Come derry dol! Can you hear me singing?");
-
+        dl.addFacultyAbstract(1, "Hey Ho",
+                "Hey! Come merry dol! derry dol! My darling! Light goes the weather-wind and the feathered starling. Down along under Hill, shining in the sunlight, Waiting on the doorstep for the cold starlight, There my pretty lady is, River-woman's daughter, Slender as the willow-wand, clearer than the water. Old Tom Bombadil water-lilies bringing Comes hopping home again. Can you hear him singing? Hey! Come merry dol! derry dol! and merry-o! Goldberry, Goldberry, merry yellow berry-o! Poor old Willow-man, you tuck your roots away! Tom's in a hurry now. Evening will follow day. Tom's going home again water-lilies bringing. Hey! Come derry dol! Can you hear me singing?");
 
         dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
 
@@ -1012,12 +854,10 @@ public class iste330Group4DataLayer {
         System.out.println("Search Faculty Name 'Con'");
         dl.searchByFacultyName("Con").forEach(item -> System.out.println(item));
 
-
-        //        dl.removeFacultyAbstract(1); //abstract ID
+        // dl.removeFacultyAbstract(1); //abstract ID
 
         System.out.println(dl.getContact(1));
         System.out.println(dl.getOffice(1));
     }
 
-
-} // End of Class 
+} // End of Class
