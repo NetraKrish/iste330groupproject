@@ -1,12 +1,14 @@
-AUthors Evan Jurdan, Miles Krassen, Tim Lonergan, Kaszuba Daniel, Krassen Miles, Krishnan Netra, Landers Seth
 
-run main method within the iste330Group4DataLayer.java
+Authors: Miles Krassen, Evan Jurdan, Tim Lonergan, Daniel Kaszuba, Netra Krishnan, Seth Landers
 
-There are pre-done methods there, make sure you setup our database on localhost!
-Database file: iste330group4.sql
+1. Make sure you have the objects package along with the iste330Group4DataLayer.java file.
 
-make sure your package is "groupproject"
+2. Setup our database on localhost.
+   DATABASE FILE: iste330group4.sql
 
-Feel free to mess with some of the tester functions inside the main method.
+3. For datalayer test, run the main method inside iste330Group4DataLayer.java
 
-IF YOU RUN MULTIPLE TIMES, DO COMMENT OUT THE METHODS THAT "ADD" ITEMS OR YOU WILL GET DUPLICATES!
+* IF YOU RUN MULTIPLE TIMES, COMMENT OUT THE METHODS THAT "ADD" ITEMS OR YOU WILL GET DUPLICATES!
+
+* Feel free to mess around with some of the tester functions, and even add more tests for functions not implemented.
+* FYI, only implement the PUBLIC functions in the tests, if they are PRIVATE, they're helper functions.
