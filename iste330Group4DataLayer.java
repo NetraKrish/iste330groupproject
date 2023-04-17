@@ -1,10 +1,8 @@
-package groupproject;
-
 
 
 // AUthors Evan Jurdan, Miles Krassen, Tim Lonergan, Kaszuba Daniel, Krassen Miles, Krishnan Netra, Landers Seth
 
-import groupproject.objects.*;
+import objects.*;
 
 import java.sql.*;
 import java.util.*;

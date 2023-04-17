@@ -1,4 +1,4 @@
-package groupproject.objects;
+package objects;
 
 public class Interest {
 
