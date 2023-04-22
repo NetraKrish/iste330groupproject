@@ -183,7 +183,7 @@ public class iste330Group4PresentationLayer {
     }
 
     /**
-     * ACCOUNT MENU
+     * ACCOUNT SETTINGS MENU
      */
     public void accountSettingsMenu() {
 
@@ -239,6 +239,9 @@ public class iste330Group4PresentationLayer {
         }
     }
 
+    /**
+     * ACCOUNT MENU
+     */
     public void accountMenu() {
 
         boolean back = false;
