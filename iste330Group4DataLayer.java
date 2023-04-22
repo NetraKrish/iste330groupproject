@@ -25,14 +25,14 @@ public class iste330Group4DataLayer {
 
     public boolean connect(String user, String pass, String db) {
 
-        String url = "jdbc:mysql://localhost/" + db +"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+        String url = "jdbc:mysql://localhost/" + db.trim() +"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
         try {
 
             Class.forName(DEFAULT_DRIVER);
             System.out.println(">> DEFAULT_DRIVER set");
 
-            this.conn = DriverManager.getConnection(url, user, pass);
+            this.conn = DriverManager.getConnection(url, user.trim(), pass.trim());
             System.out.println(">> Database connected");
 
         } catch (ClassNotFoundException e) {
@@ -48,7 +48,7 @@ public class iste330Group4DataLayer {
 
         return (this.conn != null);
     }
-//resets db instances
+    //resets db instances
     public void reset() {
 
         try {
@@ -73,7 +73,7 @@ public class iste330Group4DataLayer {
             if (this.conn != null)
                 this.conn.close();
 
-            System.out.println("\n>> Database connection closed");
+//            System.out.println("\n>> Database connection closed");
 
         } catch (SQLException e) {
 
@@ -86,7 +86,7 @@ public class iste330Group4DataLayer {
         System.out.println("[!] SQLException caught\n>>>> " + e);
     }
 
-    public String hash(String pass) {
+    private String hash(String pass) {
         String Password = "";
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -103,122 +103,94 @@ public class iste330Group4DataLayer {
     ///////////////////////////////////////////
     // Evan's code, sorry for poor documentation
 
-    public int accID(String fNam, String lNam, String pass) {
-        // finds accountID with first and last name as well as their password
-        int acID = 0;
-        String Password = "";
-        Password = hash(pass);
-     
-
-        try {
-
-            String sql = "SELECT accountID from account WHERE firstName = ? AND lastName = ? AND password = ? LIMIT 1";
-
-            this.stmt = this.conn.prepareStatement(sql);
-            this.stmt.setString(1, fNam);
-            this.stmt.setString(2, lNam);
-            this.stmt.setString(3, Password);
-            this.stmt.executeQuery();
-            this.rs = this.stmt.getResultSet();
-            if (this.rs.next()) {
-                acID = this.rs.getInt("accountID");
-            }
-        } catch (SQLException e) {
-            SQLExceptionMsg(e.getMessage());
-        }
-        reset();
-        return (acID);
-
-    }
    /********************
      * CREATE ACCOUNT
      ********************/
-    public void addAcc(String fNam, String lNam, String pass, String prefCon, String emailAdd, String PhoNum,
-    String BuilNum, String offNum, int Role) {
-int affected = 0;
-int affected2 = 0;
-int affected3 = 0;
-int acID = 0;
-String Password = "";
-Password = hash(pass);
+    public int addAccount(String fNam, String lNam, String pass, String prefCon, String emailAdd, String PhoNum,
+                           String BuilNum, String offNum, int Role) {
+        int affected = 0;
+        int affected2 = 0;
+        int affected3 = 0;
+        int acID = -1;
+        String Password = "";
+        Password = hash(pass);
 
 
-try {
+        try {
 
-    stmt = conn.prepareStatement(
-            "INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)",
-            Statement.RETURN_GENERATED_KEYS);
-    stmt.setString(1, fNam);
-    stmt.setString(2, lNam);
-    stmt.setString(3, Password);
-    stmt.setString(4, prefCon);
-    stmt.setInt(5, Role);
+            stmt = conn.prepareStatement(
+                    "INSERT INTO iste330group4.account(firstName, lastName, password, preferredContact, roleID) VALUES (?,?,?,?,?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, fNam.trim());
+            stmt.setString(2, lNam.trim());
+            stmt.setString(3, Password.trim());
+            stmt.setString(4, prefCon.trim());
+            stmt.setInt(5, Role);
 
-    affected = stmt.executeUpdate();
-    // gets any auto-generated keys after update
-    this.rs = stmt.getGeneratedKeys();
+            affected = stmt.executeUpdate();
+            // gets any auto-generated keys after update
+            this.rs = stmt.getGeneratedKeys();
 
-    if (this.rs.next()) {
+            if (this.rs.next()) {
 
-        acID = this.rs.getInt(1);
-    }
+                acID = this.rs.getInt(1);
+            }
 
-    System.out.print("\n " + affected + " record(s) inserted\n");
-} catch (Exception e) {
-    System.out.println("Error!");
-    System.out.println("Error message is --> " + e);
-}
-reset();
+            System.out.print("\n " + affected + " record(s) inserted\n");
+        } catch (Exception e) {
+            SQLExceptionMsg(e.getMessage());
+        }
+        reset();
 
 //////////////// get accountID
 
-System.out.println(acID);
+//        System.out.println(acID);
 
-/********************
-     * FACULTY SECTION
-     ********************/
-//if role belongs to faculty proceed
-if (Role == 2){
-////////////////////
-// adds office details for created faculty
-try {
+        // adds contact details
+        try {
 
-   
-    stmt = conn
-            .prepareStatement("INSERT INTO iste330group4.office(accountID, building, number) VALUES (?,?,?)");
-    stmt.setInt(1, acID);
-    stmt.setString(2, BuilNum);
-    stmt.setString(3, offNum);
-    affected2 = stmt.executeUpdate();
-    System.out.print("\n " + affected2 + " record(s) inserted\n");
-} catch (Exception e) {
-    System.out.println("Error!");
-    System.out.println("Error message is --> " + e);
-}
-reset();
-// adds contscts details for created faculty
-try {
 
-    
-    stmt = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
-    stmt.setInt(1, acID);
-    stmt.setString(2, emailAdd);
-    stmt.setString(3, PhoNum);
-    affected3 = stmt.executeUpdate();
-    System.out.print("\n " + affected3 + " record(s) inserted\n");
-} catch (Exception e) {
-    System.out.println("Error!");
-    System.out.println("Error message is --> " + e);
-}
-reset();
-}
+            stmt = conn.prepareStatement("INSERT INTO iste330group4.contact(accountID, email, phone) VALUES (?,?,?)");
+            stmt.setInt(1, acID);
+            stmt.setString(2, emailAdd.trim());
+            stmt.setString(3, PhoNum.trim());
+            affected3 = stmt.executeUpdate();
+//            System.out.print("\n " + affected3 + " record(s) inserted\n");
+        } catch (Exception e) {
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        reset();
+
+        /********************
+             * FACULTY SECTION
+             ********************/
+        //if role belongs to faculty proceed
+        if (Role == 2){
+            ////////////////////
+            // adds office details for created faculty
+            try {
+
+                stmt = conn.prepareStatement("INSERT INTO iste330group4.office(accountID, building, number) VALUES (?,?,?)");
+                stmt.setInt(1, acID);
+                stmt.setString(2, BuilNum.trim());
+                stmt.setString(3, offNum.trim());
+                affected2 = stmt.executeUpdate();
+            } catch (Exception e) {
+
+                SQLExceptionMsg(e.getMessage());
+            }
+            reset();
+        }
+
+        return acID;
 }
 
 
   /********************
      * EDIT CONTACT
      ********************/
-    public void editContact(int acID, String emailAdd, String PhoNum) {
+    public int updateContact(int acID, String emailAdd, String PhoNum) {
         int affected = 0;
         try {
 
@@ -227,18 +199,18 @@ reset();
             stmt.setString(2, PhoNum);
             stmt.setInt(3, acID);
             affected = stmt.executeUpdate();
-            System.out.print("\n " + affected + " record(s) updated\n");
         } catch (Exception e) {
-            System.out.println("Error!");
-            System.out.println("Error message is --> " + e);
+            SQLExceptionMsg(e.getMessage());
         }
         reset();
+
+        return affected;
     }
 
     /********************
      * EDIT OFFICE DETAILS
      ********************/
-    public void editOffice(int acID, String BuilNum, String offNum) {
+    public int updateOffice(int acID, String BuilNum, String offNum) {
         int affected = 0;
         try {
 
@@ -247,43 +219,43 @@ reset();
             stmt.setString(2, offNum);
             stmt.setInt(3, acID);
             affected = stmt.executeUpdate();
-            System.out.print("\n " + affected + " record(s) updated\n");
         } catch (Exception e) {
-            System.out.println("Error!");
-            System.out.println("Error message is --> " + e);
+            SQLExceptionMsg(e.getMessage());
         }
         reset();
+
+        return affected;
     }
 
     /********************
      * EDIT ACC DETAILS
      ********************/
-    public void editAcc(int acID, String fNam, String lNam, String prefCon) {
+    public int updateAccount(int acID, String fNam, String lNam, String prefCon) {
         int affected = 0;
         try {
 
-            stmt = conn.prepareStatement(
-                    "UPDATE account set firstName = ? , lastName = ? , preferredContact = ? WHERE accountID = ? ");
+            stmt = conn.prepareStatement("UPDATE account set firstName = ? , lastName = ? , preferredContact = ? WHERE accountID = ? ");
             stmt.setString(1, fNam);
             stmt.setString(2, lNam);
             stmt.setString(3, prefCon);
             stmt.setInt(4, acID);
             affected = stmt.executeUpdate();
-            System.out.print("\n " + affected + " record(s) updated\n");
+//            System.out.print("\n " + affected + " record(s) updated\n");
         } catch (Exception e) {
-            System.out.println("Error!");
-            System.out.println("Error message is --> " + e);
+            SQLExceptionMsg(e.getMessage());
         }
         reset();
+
+        return affected;
     }
     /********************
      * PASSWORD CHANGE
      ********************/
-    public void editPas(int acID, String pass) {
+    public int updatePassword(int acID, String pass) {
         int affected = 0;
         String Password = "";
 
-        Password = hash(pass);
+        Password = hash(pass.trim());
      
         try {
 
@@ -292,12 +264,13 @@ reset();
             stmt.setString(1, Password);
             stmt.setInt(2, acID);
             affected = stmt.executeUpdate();
-            System.out.print("\n " + affected + " record(s) updated\n");
+//            System.out.print("\n " + affected + " record(s) updated\n");
         } catch (Exception e) {
-            System.out.println("Error!");
-            System.out.println("Error message is --> " + e);
+            SQLExceptionMsg(e.getMessage());
         }
         reset();
+
+        return affected;
     }
 
 
@@ -466,6 +439,48 @@ reset();
     public List<SearchRecord> searchByStudentInterest(String interestsInput) {
 
         return searchByInterests("student", interestsInput);
+    }
+
+    /******************
+     * ACCOUNT SECTION
+     ******************/
+
+    public Account getAccount(int accountID, String password) {
+
+        Account account = new Account();
+
+        try {
+
+            String sql = "SELECT * FROM account WHERE accountID = ? AND password = ?";
+
+            this.stmt = this.conn.prepareStatement(sql);
+            this.stmt.setInt(1, accountID);
+            this.stmt.setString(2, hash(password.trim()));
+
+            this.rs = this.stmt.executeQuery();
+
+            if (this.rs.next()) {
+
+                account.setAccountID(this.rs.getInt("accountID"));
+                account.setFirstName(this.rs.getString("firstName"));
+                account.setLastName((this.rs.getString("lastName")));
+                account.setPreferedContact(this.rs.getString("preferredContact"));
+                account.setRoleID(this.rs.getInt("roleID"));
+
+                reset();
+
+            }else{
+
+                reset();
+                return null; //if account not found.
+            }
+
+        } catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return account;
     }
 
     /*******************
@@ -807,12 +822,12 @@ reset();
         // test functions below
 
         System.out.println("\n>> ADDING ACCOUNT TESTS");
-        dl.addAcc("john", "constantine", "yobro", "phone", "Johnny@this.dontmatter", "9999999", "somewhere",
+        dl.addAccount("john", "constantine", "yobro", "phone", "Johnny@this.dontmatter", "9999999", "somewhere",
                 "over the rainbow",2);
-        dl.addAcc("sarah", "connor", "johnconnor", "in person visit", "3000@this.dontmatter", "55125851", "bunker",
+        dl.addAccount("sarah", "connor", "johnconnor", "in person visit", "3000@this.dontmatter", "55125851", "bunker",
                 "z892e",2);
-        dl.addAcc("Evan", "Jurdan", "Meow", "phone", "e@some.com", "my#",null,null,1);
-        dl.addAcc("harry", "Styles", "song", "email", "AAAA@A.com", "908264348",null,null,3);
+        dl.addAccount("Evan", "Jurdan", "Meow", "phone", "e@some.com", "my#",null,null,1);
+        dl.addAccount("harry", "Styles", "song", "email", "AAAA@A.com", "908264348",null,null,3);
 
         System.out.println("\n>> ADDING INTEREST TESTS");
         dl.addStudentInterest(3, "Biology");
