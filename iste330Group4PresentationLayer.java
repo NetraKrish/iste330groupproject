@@ -931,13 +931,52 @@ public class iste330Group4PresentationLayer {
     public void showInterests() {
 
 
+        sendMsg("Show Interests");
+        
+        int acID = account.getAccountID();
+        if(account.getRoleID()==1)
+        {
+            sendMsg(this.dl.getStudentInterests(acID).toString());
+        }
+        else if(account.getRoleID()==2)
+        {
+            sendMsg(this.dl.getFacultyInterests(acID).toString());
+        }
+        if(account.getRoleID()==3)
+        {
+            sendMsg(this.dl.getGuestInterests(acID).toString());
+        }
     }
 
     /**
      * ADD INTEREST
      */
     public void addInterest() {
+        sendMsg("Add Interests");
+        sendMsg("Input Interest to Add: ");
+        String interest = this.reader.nextLine();
+        int acID = account.getAccountID();
+        if(account.getRoleID()==1)
+        {
+            if(this.dl.addStudentInterest(acID,interest) > 0) {
 
+                sendMsg("Successfully Added Interest!");
+            }
+        }
+        else if(account.getRoleID()==2)
+        {
+            if(this.dl.addFacultyInterest(acID,interest) > 0) {
+
+                sendMsg("Successfully Added Interest!");
+            }
+        }
+        if(account.getRoleID()==3)
+        {
+            if(this.dl.addGuestInterest(acID,interest) > 0) {
+
+                sendMsg("Successfully Added Interest!");
+            }
+        }
 
     }
 
@@ -946,7 +985,31 @@ public class iste330Group4PresentationLayer {
      */
     public void removeInterest() {
 
+        sendMsg(" Remove Interests");
+        sendMsg("Input InterestID of interest to remove: ");
+        int interestID = this.reader.nextInt();
+        
+        if(account.getRoleID()==1)
+        {
+            if(this.dl.removeStudentInterest(interestID) > 0) {
 
+                sendMsg("Successfully Removed Interest!");
+            }
+        }
+        else if(account.getRoleID()==2)
+        {
+            if(this.dl.removeFacultyInterest(interestID) > 0) {
+
+                sendMsg("Successfully Removed Interest!");
+            }
+        }
+        else if(account.getRoleID()==3)
+        {
+            if(this.dl.removeGuestInterest(interestID) > 0) {
+
+                sendMsg("Successfully Removed Interest!");
+            }
+        }
     }
 
     /**
@@ -954,14 +1017,25 @@ public class iste330Group4PresentationLayer {
      */
     public void searchStudentInterests() {
 
-
+        sendMsg("Search Interests");
+        sendMsg("Enter interestID to search: ");
+        
+        int intID = this.reader.nextInt();
+        
+        sendMsg(this.dl.getStudentInterests(intID).toString());
     }
+   
 
     /**
      * SEARCH FACULTY INTERESTS
      */
     public void searchFacultyInterests() {
-
+        sendMsg("Search Interests");
+        sendMsg("Enter interestID to search: ");
+        
+        int intID = this.reader.nextInt();
+        
+        sendMsg(this.dl.getFacultyInterests(intID).toString());
 
     }
 
@@ -969,7 +1043,12 @@ public class iste330Group4PresentationLayer {
      * SEARCH STUDENT NAMES
      */
     public void searchStudentNames() {
-
+        sendMsg("Search Interests");
+        sendMsg("Enter interestID to search: ");
+        
+        int acID = this.reader.nextInt();
+        
+        sendMsg(this.dl.getGuestInterests(acID).toString());
 
     }
 

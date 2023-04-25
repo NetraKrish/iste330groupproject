@@ -705,13 +705,13 @@ public class iste330Group4DataLayer {
         return getInterests("guest", accountID);
     }
 
-    private int removeInterest(String role, int interestID) {
+    private int removeInterest(String string, int interestID) {
 
         int effected = 0;
 
         try {
 
-            String sql = "DELETE FROM " + role + "_interest WHERE interestID = ?";
+            String sql = "DELETE FROM " + string + "_interest WHERE interestID = ?";
 
             this.stmt = this.conn.prepareStatement(sql);
             this.stmt.setInt(1, interestID);
@@ -884,5 +884,7 @@ public class iste330Group4DataLayer {
 
         dl.close();
     }
+
+    
 
 } // End of Class
