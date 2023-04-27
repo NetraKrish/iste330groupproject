@@ -368,6 +368,7 @@ public class iste330Group4PresentationLayerGUI {
         fields.replace("Password", new JPasswordField(""));
 
         JButton submit = new JButton("Login");
+        JButton back = new JButton("Back");
 
         //add to panel
         for(String tag: tags) {
@@ -376,8 +377,14 @@ public class iste330Group4PresentationLayerGUI {
             panel.add(fields.get(tag));
         }
 
-        panel.add(new JLabel());
+        panel.add(back);
         panel.add(submit);
+
+        //listen for back
+        back.addActionListener(ignored -> {
+
+            showContent(loginMenu());
+        });
 
         //listen for submit
         submit.addActionListener(ignored -> {
@@ -469,10 +476,19 @@ public class iste330Group4PresentationLayerGUI {
         //add the save button
         JButton save = new JButton("Save");
 
-        panel.add(new JLabel());
+        //add the cancel button
+        JButton cancel = new JButton("Cancel");
+
+        panel.add(cancel);
         panel.add(save);
 
-        //listener for button click action
+        //listener for cancel button click
+        cancel.addActionListener(ignored -> {
+
+            showContent(loginMenu());
+        });
+
+        //listener for save button click action
         save.addActionListener(ignored -> {
 
             String preferredContact = getSelectedRadioValue(preferredContactRadioButtons);
