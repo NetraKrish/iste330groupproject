@@ -273,9 +273,116 @@ public class iste330Group4PresentationLayerGUI {
         });
 
         //******* add rest of listeners
+         buttons.get("Account Settings").addActionListener(ignored -> {
+
+            showContent(accountSettings());
+        });
+        
+        buttons.get("Search By Interests").addActionListener(ignored -> {
+
+            showContent(searchByInterest());
+        });
+
+        buttons.get("Search By Name").addActionListener(ignored -> {
+
+            showContent(searchByName());
+        });
+        
+        buttons.get("Search By Faculty Abstract").addActionListener(ignored -> {
+
+            showContent(searchByFaculty());
+        });
 
         return panel;
     }
+    
+    
+    public JPanel accountSettings() {
+      JPanel panel = new JPanel(new GridLayout(3,1));
+      
+      String[] ids = new String[]{
+                "Main Menu"
+      };
+      
+      HashMap<String, JButton> buttons = createButtons(ids);
+      for(String id: ids) {
+            panel.add(buttons.get(id));
+       }
+       
+       buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+      
+      
+      return panel;
+      
+    }
+    
+    public JPanel searchByInterest() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+                  "Main Menu"
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         
+         buttons.get("Main Menu").addActionListener(ignored -> {
+  
+              showContent(mainMenu());
+        });
+
+    
+      return panel;
+    }
+    
+    public JPanel searchByName() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+                  "Main Menu"
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         
+         buttons.get("Main Menu").addActionListener(ignored -> {
+  
+              showContent(mainMenu());
+        });
+    
+      return panel;
+    }
+    
+    public JPanel searchByFaculty() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+                  "Main Menu"
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         
+         buttons.get("Main Menu").addActionListener(ignored -> {
+  
+              showContent(mainMenu());
+        });
+    
+      return panel;
+    }
+    
+    
+    
+    
 
     /****************
      * MAIN METHODS
@@ -527,6 +634,16 @@ public class iste330Group4PresentationLayerGUI {
         //MUST RETURN PANEL OR IT WON'T DISPLAY
         return panel;
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     public static void main(String[] args) {
 
