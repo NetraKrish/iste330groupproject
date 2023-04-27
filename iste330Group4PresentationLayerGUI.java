@@ -75,7 +75,7 @@ public class iste330Group4PresentationLayerGUI {
 
     public void showPopupError(String title, String e) {
 
-        JLabel error = new JLabel(e);
+        JLabel error = new JLabel("Error: " + e);
 
         JOptionPane.showMessageDialog(null, error, title, JOptionPane.INFORMATION_MESSAGE);
     }
@@ -465,7 +465,7 @@ public class iste330Group4PresentationLayerGUI {
 
         for(String id: tags) {
 
-            //if faculty, don't add these choices to the panel
+            //if not faculty, don't add these choices to the panel
             if(!getSelectedRadioValue(roleRadioButtons).equals("Faculty") && (id.equals("Building") || id.equals("Office Number")))
                 continue;
 
