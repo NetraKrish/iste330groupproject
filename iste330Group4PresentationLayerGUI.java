@@ -42,7 +42,7 @@ public class iste330Group4PresentationLayerGUI {
         this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.frame.setPreferredSize(new Dimension(400,400));
         this.frame.pack();
-        this.frame.setResizable(false);
+        this.frame.setResizable(true);
 
     }
 
@@ -262,6 +262,7 @@ public class iste330Group4PresentationLayerGUI {
                 "Account Settings",
                 "Search By Interests",
                 "Search By Name",
+                "Search By ID",
                 "Search By Faculty Abstract"
         };
 
@@ -291,6 +292,11 @@ public class iste330Group4PresentationLayerGUI {
         buttons.get("Search By Name").addActionListener(ignored -> {
 
             showContent(searchByName());
+        });
+
+        buttons.get("Search By ID").addActionListener(ignored -> {
+
+            showContent(searchByID());
         });
         
         buttons.get("Search By Faculty Abstract").addActionListener(ignored -> {
@@ -679,7 +685,7 @@ public class iste330Group4PresentationLayerGUI {
             }
 
 
-
+            this.frame.pack();
         return panel;
     }
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -885,7 +891,7 @@ public class iste330Group4PresentationLayerGUI {
                 panel.add(labels3.get(tag));
             }
 
-
+            this.frame.pack();
         return panel;
     }
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -943,7 +949,7 @@ public class iste330Group4PresentationLayerGUI {
 
             showContent(nameSearchResults(searchRecords, 2, interesting, NAME));
         });
-
+        this.frame.pack();
       return panel;
         
       }
@@ -1002,7 +1008,7 @@ public class iste330Group4PresentationLayerGUI {
 
             showContent(nameSearchResults(searchRecords, 1, interesting, NAME));
         });
-
+        this.frame.pack();
       return panel;
         
       }
@@ -1023,12 +1029,144 @@ public class iste330Group4PresentationLayerGUI {
   
               showContent(mainMenu());
         });
-    
+        this.frame.pack();
       return panel;
     }
    //////////////////////////////////////////////////////////////////////////////////////////
     
     
+
+//////////////////////////////////////////////////////////////////////////////////////////
+public JPanel idSearchResults(List<SearchRecord> searchRecords, int type, List<Interest> interestz) {
+    JPanel panel = new JPanel(new GridLayout(0,3));
+    
+
+    String[] ids = new String[]{
+        "Back",
+        "Search again",
+        "Main Menu"
+    };
+    
+    HashMap<String, JButton> buttons = createButtons(ids);
+    for(String id: ids) {
+          panel.add(buttons.get(id));
+     }
+
+     buttons.get("Back").addActionListener(ignored -> {
+
+        showContent(searchByID());
+    });
+    buttons.get("Search again").addActionListener(ignored -> {
+        
+            showContent(searchByID());
+
+    });
+    buttons.get("Main Menu").addActionListener(ignored -> {
+
+        showContent(mainMenu());
+    });
+
+        String[] outputs = new String[]{
+            
+            "Account ID, ","Name, ","Interest "
+        };
+        
+        HashMap<String, JLabel> labels2 = createLabels(outputs);
+        
+        for(String tag: outputs) {
+            panel.add(labels2.get(tag));
+        }
+        
+        
+
+        for (SearchRecord ser : searchRecords){
+            
+            String[] output1 = new String[]{
+                String.valueOf(ser.getAccountID()), ser.getName()
+                
+                
+            };
+            //System.out.println(String.valueOf(ser.getAccountID())+ ser.getName());
+            HashMap<String, JLabel> labels3 = createLabels(output1);
+            for(String tag: output1) {
+                panel.add(labels3.get(tag));
+            }
+            
+
+        }
+        String Interesttz = "  ";
+        for (Interest i : interestz) {
+            Interesttz += i.getInterest();
+            Interesttz += ", ";
+        
+
+        }
+        Interesttz = Interesttz.substring(0, (Interesttz.length() - 2));
+        String[] output1 = new String[]{
+            Interesttz
+        };
+        
+        HashMap<String, JLabel> labels3 = createLabels(output1);
+        for(String tag: output1) {
+            panel.add(labels3.get(tag));
+        }
+
+        this.frame.pack();
+    return panel;
+}
+//////////////////////////////////////////////////////////////////////////////////////////
+public JPanel searchByID() {
+    JPanel panel = new JPanel(new GridLayout(5,2));
+    
+    String[] ids = new String[]{
+        "Main Menu",
+        "Search",
+    };
+    
+    HashMap<String, JButton> buttons = createButtons(ids);
+    for(String id: ids) {
+          panel.add(buttons.get(id));
+     }
+
+     String[] tags = new String[]{
+            
+            "ID: "
+        };
+
+        HashMap<String, JLabel> labels = createLabels(tags);
+        HashMap<String, JTextField> fields = createTextFields(tags);
+
+        for(String tag: tags) {
+
+            panel.add(labels.get(tag));
+            panel.add(fields.get(tag));
+        }
+
+
+     buttons.get("Main Menu").addActionListener(ignored -> {
+
+          showContent(mainMenu());
+      });
+    
+      
+    buttons.get("Search").addActionListener(ignored -> {
+        int search = Integer.parseInt(fields.get("ID: ").getText());
+        
+
+        List<SearchRecord> searchRecords = dl.searchById(search);
+        
+        List<Interest> interesting = dl.getFacultyInterests(search);
+
+
+        showContent(idSearchResults(searchRecords, 2, interesting));
+    });
+    this.frame.pack();
+  return panel;
+    
+  }
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
     
 
     /****************

@@ -802,6 +802,47 @@ public class iste330Group4DataLayer {
         return addInterest("guest", accountID, interest);
     }
 
+    /*******************
+     * SEARCH INTERESTS
+    *******************/
+    public List<SearchRecord> searchById(int idd) {
+
+        List<SearchRecord> searchRecords = new LinkedList<>();
+
+        try {
+
+            
+
+            String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a WHERE a.accountID ="+ idd;
+
+
+            this.stmt = this.conn.prepareStatement(sql);
+            this.rs = this.stmt.executeQuery();
+
+            while (this.rs.next()) {
+
+                searchRecords.add(new SearchRecord(
+                        this.rs.getInt("accountID"),
+                        this.rs.getString("name")
+                ));
+            }
+
+            reset();
+
+        } catch (SQLException e) {
+
+            SQLExceptionMsg(e.getMessage());
+        }
+
+        return searchRecords;
+    }
+
+    
+
+    
+
+
+
     public static void main(String[] args) {
 
         Scanner reader = new Scanner(System.in);
