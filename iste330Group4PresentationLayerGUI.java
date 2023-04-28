@@ -1,7 +1,12 @@
 import objects.Account;
+import objects.SearchRecord;
+import objects.Interest;
 
 import javax.swing.*;
+import javax.swing.text.html.HTML.Tag;
+
 import java.awt.*;
+import java.util.List;
 import java.util.*;
 
 
@@ -524,6 +529,216 @@ public class iste330Group4PresentationLayerGUI {
         
       }
       //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel searchByInterest() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+                  "Main Menu",
+                  "Search Students",
+                  "Search Faculty"
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         
+         buttons.get("Main Menu").addActionListener(ignored -> {
+  
+              showContent(mainMenu());
+        });
+        
+        buttons.get("Search Students").addActionListener(ignored -> {
+  
+            showContent(searchStudentInterest());
+        });
+
+        buttons.get("Search Faculty").addActionListener(ignored -> {
+  
+            showContent(searchFacultyInterest());
+        });
+    
+      return panel;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel searchStudentInterest() {
+        JPanel panel = new JPanel(new GridLayout(5,2));
+        
+        String[] ids = new String[]{
+            "Back",
+            "Search",
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         String[] tags = new String[]{
+                
+                "1: ","2: ","3: "
+            };
+            JLabel title;
+            title = new JLabel("Interest to search for") ;
+            JLabel title2;
+            title2 = new JLabel(": ") ;
+            HashMap<String, JLabel> labels = createLabels(tags);
+            HashMap<String, JTextField> fields = createTextFields(tags);
+            panel.add(title);
+            panel.add(title2);
+            for(String tag: tags) {
+
+                panel.add(labels.get(tag));
+                panel.add(fields.get(tag));
+            }
+
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(searchByInterest());
+          });
+        
+          
+        buttons.get("Search").addActionListener(ignored -> {
+            String searches = fields.get("1: ").getText();
+            searches += ",";
+            searches += fields.get("2: ").getText();
+            searches += ",";
+            searches += fields.get("3: ").getText();
+            
+            List<SearchRecord> searchRecords = dl.searchByStudentInterest(searches);
+            
+
+
+            showContent(searchResults(searchRecords, 1));
+        });
+
+      return panel;
+        
+      }
+      //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel searchResults(List<SearchRecord> searchRecords, int type) {
+        JPanel panel = new JPanel(new GridLayout(0,3));
+
+        String[] ids = new String[]{
+            "Back",
+            "Search again",
+            "Main Menu"
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+            showContent(searchByInterest());
+        });
+        buttons.get("Search again").addActionListener(ignored -> {
+            if(type ==1){
+                showContent(searchStudentInterest());
+            }
+            if(type ==2){
+                showContent(searchFacultyInterest());
+            }
+            if(type ==3){
+                showContent(ERROR());
+            }
+
+
+        });
+        buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+            String[] outputs = new String[]{
+                
+                "Account ID, ","Name, ","Common Interest "
+            };
+            
+            HashMap<String, JLabel> labels2 = createLabels(outputs);
+            
+            for(String tag: outputs) {
+                panel.add(labels2.get(tag));
+            }
+            
+            
+            for (SearchRecord ser : searchRecords) {
+                
+                String[] output1 = new String[]{
+                    String.valueOf(ser.getAccountID()), ser.getName(), ser.getCommonInterests()
+                    
+                };
+                
+                HashMap<String, JLabel> labels3 = createLabels(output1);
+                for(String tag: output1) {
+                    panel.add(labels3.get(tag));
+                }
+
+            }
+
+
+
+        return panel;
+    }
+        //////////////////////////////////////////////////////////////////////////////////////////
+        public JPanel searchFacultyInterest() {
+            JPanel panel = new JPanel(new GridLayout(5,2));
+            
+            String[] ids = new String[]{
+                "Back",
+                "Search",
+            };
+            
+            HashMap<String, JButton> buttons = createButtons(ids);
+            for(String id: ids) {
+                  panel.add(buttons.get(id));
+             }
+    
+             String[] tags = new String[]{
+                    
+                    "1: ","2: ","3: "
+                };
+                JLabel title;
+                title = new JLabel("Interest to search for") ;
+                JLabel title2;
+                title2 = new JLabel(": ") ;
+                HashMap<String, JLabel> labels = createLabels(tags);
+                HashMap<String, JTextField> fields = createTextFields(tags);
+                panel.add(title);
+                panel.add(title2);
+                for(String tag: tags) {
+    
+                    panel.add(labels.get(tag));
+                    panel.add(fields.get(tag));
+                }
+    
+    
+             buttons.get("Back").addActionListener(ignored -> {
+      
+                  showContent(searchByInterest());
+              });
+            
+              
+            buttons.get("Search").addActionListener(ignored -> {
+                String searches = fields.get("1: ").getText();
+                searches += ",";
+                searches += fields.get("2: ").getText();
+                searches += ",";
+                searches += fields.get("3: ").getText();
+                
+                List<SearchRecord> searchRecords = dl.searchByFacultyInterest(searches);
+                
+    
+    
+                showContent(searchResults(searchRecords, 2));
+            });
+    
+          return panel;
+            
+          }
+    //////////////////////////////////////////////////////////////////////////////////////////
     public JPanel ERROR() {
         JPanel panel = new JPanel(new GridLayout(3,1));
         
@@ -547,28 +762,7 @@ public class iste330Group4PresentationLayerGUI {
       return panel;
         
       }
-    
-    public JPanel searchByInterest() {
-        JPanel panel = new JPanel(new GridLayout(3,1));
-        
-        String[] ids = new String[]{
-                  "Main Menu"
-        };
-        
-        HashMap<String, JButton> buttons = createButtons(ids);
-        for(String id: ids) {
-              panel.add(buttons.get(id));
-         }
-         
-         buttons.get("Main Menu").addActionListener(ignored -> {
-  
-              showContent(mainMenu());
-        });
-
-    
-      return panel;
-    }
-    
+    //////////////////////////////////////////////////////////////////////////////////////////
     public JPanel searchByName() {
         JPanel panel = new JPanel(new GridLayout(3,1));
         
@@ -744,7 +938,7 @@ public class iste330Group4PresentationLayerGUI {
                 showPopupError("Login Failed", "Your accountID and or password was incorrect!");
 
             }else {
-
+                
                 showContent(mainMenu());
             }
         });
