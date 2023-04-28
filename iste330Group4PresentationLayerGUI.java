@@ -1644,6 +1644,7 @@ public JPanel searchByID() {
         //validate
         if(field.getText().equals("")){
 
+            showPopupError("Invalid Name!");
             return mainMenu();
         }
         //records returned
