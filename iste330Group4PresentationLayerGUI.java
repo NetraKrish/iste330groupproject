@@ -296,12 +296,14 @@ public class iste330Group4PresentationLayerGUI {
         return panel;
     }
     
-    
+     //////////////////////////////////////////////////////////////////////////////////////////
     public JPanel accountSettings() {
       JPanel panel = new JPanel(new GridLayout(3,1));
       
       String[] ids = new String[]{
-                "Main Menu"
+                "Main Menu",
+                "Account Actions",
+                "Interest Actions"
       };
       
       HashMap<String, JButton> buttons = createButtons(ids);
@@ -314,10 +316,237 @@ public class iste330Group4PresentationLayerGUI {
             showContent(mainMenu());
         });
       
-      
+        buttons.get("Account Actions").addActionListener(ignored -> {
+
+            showContent(ERROR());
+        });
+        buttons.get("Interest Actions").addActionListener(ignored -> {
+
+            showContent(interestActions());
+        });
+
       return panel;
       
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel interestActions() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+            "Back",
+            "View Interests",
+            "Add an Interest",
+            "Remove an Interest"
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(accountSettings());
+          });
+        
+          buttons.get("View Interests").addActionListener(ignored -> {
+  
+            showPopup(showInterests()); 
+        });
+          
+        buttons.get("Add an Interest").addActionListener(ignored -> {
+  
+            showContent(addInterest());
+        });
+
+          buttons.get("Remove an Interest").addActionListener(ignored -> {
+  
+            showContent(removeInterest());
+        });
+      return panel;
+        
+      }
+      /////////////////////////////
+    public String showInterests() {
+
+        String out = "";
+        out+=("Show Interests\n");
+        
+        int acID = account.getAccountID();
+        if(account.getRoleID()==1)
+        {
+            out+=(this.dl.getStudentInterests(acID).toString());
+            out+="\n";
+        }
+        else if(account.getRoleID()==2)
+        {
+            out+=(this.dl.getFacultyInterests(acID).toString());
+            out+="\n";
+        }
+        if(account.getRoleID()==3)
+        {
+            out+=(this.dl.getGuestInterests(acID).toString());
+            out+="\n";
+        }
+        return out;
+    }
+      //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel addInterest() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+            "Back",
+            "Add",
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         String[] tags = new String[]{
+                "Interest"
+            };
+    
+            HashMap<String, JLabel> labels = createLabels(tags);
+            HashMap<String, JTextField> fields = createTextFields(tags);
+
+            for(String tag: tags) {
+
+                panel.add(labels.get(tag));
+                panel.add(fields.get(tag));
+            }
+
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(interestActions());
+          });
+        
+          
+        buttons.get("Add").addActionListener(ignored -> {
+            String interest = fields.get("Interest").getText();
+            int acID = account.getAccountID();
+                if(account.getRoleID()==1)
+                {
+                    if(this.dl.addStudentInterest(acID,interest) > 0) {
+
+                        showPopup("Successfully Added Interest!");
+                    }
+                }
+                else if(account.getRoleID()==2)
+                {
+                    if(this.dl.addFacultyInterest(acID,interest) > 0) {
+
+                        showPopup("Successfully Added Interest!");
+                    }
+                }
+                if(account.getRoleID()==3)
+                {
+                    if(this.dl.addGuestInterest(acID,interest) > 0) {
+
+                        showPopup("Successfully Added Interest!");
+                    }
+                }
+            showContent(interestActions());
+        });
+
+      return panel;
+        
+      }
+      //////////////////////////////////////////////////////////////////////////////////////////
+      public JPanel removeInterest() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+            "Back",
+            "Remove",
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         String[] tags = new String[]{
+                "Interest ID"
+            };
+    
+            HashMap<String, JLabel> labels = createLabels(tags);
+            HashMap<String, JTextField> fields = createTextFields(tags);
+
+            for(String tag: tags) {
+
+                panel.add(labels.get(tag));
+                panel.add(fields.get(tag));
+            }
+
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(interestActions());
+          });
+        
+          
+        buttons.get("Remove").addActionListener(ignored -> {
+            try{
+            int interestID = Integer.parseInt(fields.get("Interest ID").getText());
+            
+                if(account.getRoleID()==1)
+                {
+                if(this.dl.removeStudentInterest(interestID) > 0) {
+
+                    showPopup("Successfully Removed Interest!");
+                }
+                }
+                else if(account.getRoleID()==2)
+                {
+                    if(this.dl.removeFacultyInterest(interestID) > 0) {
+
+                        showPopup("Successfully Removed Interest!");
+                    }
+                }
+                else if(account.getRoleID()==3)
+                {
+                    if(this.dl.removeGuestInterest(interestID) > 0) {
+
+                        showPopup("Successfully Removed Interest!");
+                    }
+                }
+            showContent(interestActions());
+        }
+            catch(Exception e){
+                showPopup("Only input Integers");
+            }
+        });
+
+      return panel;
+        
+      }
+      //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel ERROR() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+            "Bad",
+            "Main Menu"
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         
+        
+          buttons.get("Main Menu").addActionListener(ignored -> {
+  
+            showContent(mainMenu());
+        });
+          
+      
+      return panel;
+        
+      }
     
     public JPanel searchByInterest() {
         JPanel panel = new JPanel(new GridLayout(3,1));
@@ -421,7 +650,9 @@ public class iste330Group4PresentationLayerGUI {
 
         //update fields that need custom attention
         fields.get("Database").setText("iste330group4");
-        fields.replace("Password", new JPasswordField(""));
+        //get rid of root, change passwordfield text to nothing//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        fields.get("Username").setText("root");
+        fields.replace("Password", new JPasswordField("student"));
 
         JButton submit = new JButton("Connect");
 
