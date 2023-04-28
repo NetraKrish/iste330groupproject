@@ -80,8 +80,8 @@ public class iste330Group4PresentationLayerGUI {
 
     public void showPopupError(String title, String e) {
 
-        JLabel error = new JLabel("Error: " + e);
-
+        JLabel error = new JLabel("Stick to the rules, butterboy. Error: " + e);
+        
         JOptionPane.showMessageDialog(null, error, title, JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -767,22 +767,246 @@ public class iste330Group4PresentationLayerGUI {
         JPanel panel = new JPanel(new GridLayout(3,1));
         
         String[] ids = new String[]{
-                  "Main Menu"
+            "Main Menu",
+            "Search Students",
+            "Search Faculty"
+        };
+  
+            HashMap<String, JButton> buttons = createButtons(ids);
+            for(String id: ids) {
+                panel.add(buttons.get(id));
+            }
+   
+            buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+            });
+  
+            buttons.get("Search Students").addActionListener(ignored -> {
+
+            showContent(searchStudentByName());
+            });
+
+            buttons.get("Search Faculty").addActionListener(ignored -> {
+
+            showContent(searchFacultyByName());
+            });
+    
+      return panel;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel nameSearchResults(List<SearchRecord> searchRecords, int type, List<Interest> interestz, String NAME) {
+        JPanel panel = new JPanel(new GridLayout(0,3));
+        String Interesttz = "";
+
+        String[] ids = new String[]{
+            "Back",
+            "Search again",
+            "Main Menu"
         };
         
         HashMap<String, JButton> buttons = createButtons(ids);
         for(String id: ids) {
               panel.add(buttons.get(id));
          }
-         
-         buttons.get("Main Menu").addActionListener(ignored -> {
+
+         buttons.get("Back").addActionListener(ignored -> {
   
-              showContent(mainMenu());
+            showContent(searchByInterest());
         });
-    
-      return panel;
+        buttons.get("Search again").addActionListener(ignored -> {
+            if(type ==1){
+                showContent(searchStudentByName());
+            }
+            if(type ==2){
+                showContent(searchFacultyByName());
+            }
+            if(type ==3){
+                showContent(ERROR());
+            }
+
+
+        });
+        buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+
+            String[] outputs = new String[]{
+                
+                "Account ID, ","Name, ","Interest "
+            };
+            
+            HashMap<String, JLabel> labels2 = createLabels(outputs);
+            
+            for(String tag: outputs) {
+                panel.add(labels2.get(tag));
+            }
+            
+            
+
+            for (SearchRecord ser : searchRecords){
+                System.out.println(NAME+"..");
+                System.out.println(ser.getName()+"..");
+                
+                if(NAME.equals(ser.getName())){
+                    String[] output1 = new String[]{
+                        String.valueOf(ser.getAccountID()), ser.getName()
+                        
+                        
+                    };
+                    //System.out.println(String.valueOf(ser.getAccountID())+ ser.getName());
+                    HashMap<String, JLabel> labels3 = createLabels(output1);
+                    for(String tag: output1) {
+                        panel.add(labels3.get(tag));
+                    }
+                }
+
+            }
+            
+            for (Interest i : interestz) {
+                Interesttz += i.getInterest();
+                Interesttz += ", ";
+                
+                    
+                    
+                    
+                
+                
+
+            }
+            Interesttz = Interesttz.substring(0, (Interesttz.length() - 2));
+            String[] output1 = new String[]{
+                Interesttz
+            };
+            
+            HashMap<String, JLabel> labels3 = createLabels(output1);
+            for(String tag: output1) {
+                panel.add(labels3.get(tag));
+            }
+
+
+        return panel;
     }
-    
+    //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel searchFacultyByName() {
+        JPanel panel = new JPanel(new GridLayout(5,2));
+        
+        String[] ids = new String[]{
+            "Back",
+            "Search",
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         String[] tags = new String[]{
+                
+                "First name: ","Last name: "
+            };
+
+            HashMap<String, JLabel> labels = createLabels(tags);
+            HashMap<String, JTextField> fields = createTextFields(tags);
+
+            for(String tag: tags) {
+
+                panel.add(labels.get(tag));
+                panel.add(fields.get(tag));
+            }
+
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(searchByName());
+          });
+        
+          
+        buttons.get("Search").addActionListener(ignored -> {
+            String searches = fields.get("First name: ").getText();
+            searches += " ";
+            searches += fields.get("Last name: ").getText();
+
+            String NAME = fields.get("First name: ").getText()+", "+fields.get("Last name: ").getText();
+            // searches = "James Bond";
+            List<SearchRecord> searchRecords = dl.searchByFacultyName(searches);
+            int acid = 0;
+            for (SearchRecord ser : searchRecords) {
+                if(NAME.equals(ser.getName())){
+                    acid = ser.getAccountID();
+                    System.out.println(acid);
+                }
+            }
+            List<Interest> interesting = dl.getFacultyInterests(acid);
+
+
+            showContent(nameSearchResults(searchRecords, 2, interesting, NAME));
+        });
+
+      return panel;
+        
+      }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel searchStudentByName() {
+        JPanel panel = new JPanel(new GridLayout(5,2));
+        
+        String[] ids = new String[]{
+            "Back",
+            "Search",
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         String[] tags = new String[]{
+                
+                "First name: ","Last name: "
+            };
+
+            HashMap<String, JLabel> labels = createLabels(tags);
+            HashMap<String, JTextField> fields = createTextFields(tags);
+
+            for(String tag: tags) {
+
+                panel.add(labels.get(tag));
+                panel.add(fields.get(tag));
+            }
+
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(searchByName());
+          });
+        
+          
+        buttons.get("Search").addActionListener(ignored -> {
+            String searches = fields.get("First name: ").getText();
+            searches += " ";
+            searches += fields.get("Last name: ").getText();
+            
+            String NAME = fields.get("Last name: ").getText()+", "+fields.get("First name: ").getText();
+            // searches = "James Bond";
+            List<SearchRecord> searchRecords = dl.searchByStudentName(searches);
+            int acid = 0;
+            for (SearchRecord ser : searchRecords) {
+                if(NAME.equals(ser.getName())){
+                    acid = ser.getAccountID();
+                    System.out.println(acid);
+                }
+            }
+            List<Interest> interesting = dl.getStudentInterests(acid);
+
+
+            showContent(nameSearchResults(searchRecords, 1, interesting, NAME));
+        });
+
+      return panel;
+        
+      }
+   ////////////////////////////////////////////////////////////////////////////////////////// 
     public JPanel searchByFaculty() {
         JPanel panel = new JPanel(new GridLayout(3,1));
         
@@ -802,7 +1026,7 @@ public class iste330Group4PresentationLayerGUI {
     
       return panel;
     }
-    
+   //////////////////////////////////////////////////////////////////////////////////////////
     
     
     
