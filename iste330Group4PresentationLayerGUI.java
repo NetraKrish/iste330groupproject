@@ -1,3 +1,4 @@
+import objects.Abstract;
 import objects.Account;
 import objects.SearchRecord;
 import objects.Interest;
@@ -639,7 +640,7 @@ public class iste330Group4PresentationLayerGUI {
         });
 
         buttons.get("Search Faculty").addActionListener(ignored -> {
-  
+
             showContent(searchFacultyInterest());
         });
     
@@ -874,7 +875,8 @@ public class iste330Group4PresentationLayerGUI {
 
             buttons.get("Search Faculty").addActionListener(ignored -> {
 
-            showContent(searchFacultyByName());
+                showContent(searchByFacultyName());
+//            showContent(searchFacultyByName());
             });
     
       return panel;
@@ -1319,6 +1321,120 @@ public JPanel searchByID() {
         });
 
         return panel;
+    }
+
+
+
+    /**
+     * Search By Faculty Name (MILES KRASSEN EXAMPLE)
+     * @return JPanel
+     */
+    public JPanel searchByFacultyName() {
+
+        //setup popup panel
+        JPanel panel = new JPanel(new GridLayout(1,1));
+
+        JTextField field = new JTextField("");
+        panel.add(field);
+
+        showPopup("Search By Faculty Name", panel);
+
+        //validate
+        do {
+
+            showPopup("Search By Faculty Name", panel);
+
+        }while (field.getText().length() == 0 || field.getText().matches("[\\s]+"));
+
+        //records returned
+        List<SearchRecord> records = this.dl.searchByFacultyName(field.getText());
+
+        //this is the panel to send back
+        panel = new JPanel(new GridLayout(records.size() + 1, 3));
+
+        JButton back = new JButton("Back");
+
+        panel.add(back);
+        panel.add(new JLabel());
+        panel.add(new JLabel());
+
+        back.addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+
+        for(SearchRecord record: records) {
+
+            panel.add(new JLabel(record.getName()));
+
+            JButton interestBtn = new JButton("Interests");
+            JButton abstractBtn = new JButton("Abstracts");
+
+            panel.add(interestBtn);
+            panel.add(abstractBtn);
+
+            interestBtn.addActionListener(ignored -> {
+
+                showInterestsPopup(record.getAccountID(), record.getName(), 2);
+            });
+
+            abstractBtn.addActionListener(ignored -> {
+
+                showFacultyAbstractPopup(record.getAccountID(), record.getName());
+            });
+        }
+
+        return panel;
+    }
+
+    /**
+     * Show Interests Popup (MILES KRASSEN EXAMPLE)
+     * @param accountID
+     * @param name
+     * @param role
+     */
+    public void showInterestsPopup(int accountID, String name, int role) {
+
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        List<Interest> interests = switch (role) {
+            case 1 -> this.dl.getStudentInterests(accountID);
+            case 2 -> this.dl.getFacultyInterests(accountID);
+            default -> this.dl.getGuestInterests(accountID);
+        };
+
+        for(Interest interest: interests) {
+
+            panel.add(new JLabel(interest.getInterest()));
+        }
+
+        showPopup(name + " - Interests", panel);
+    }
+
+    /**
+     * Show Faculty Abstract Popup (MILES KRASSEN EXAMPLE)
+     * @param accountID
+     * @param name
+     */
+    public void showFacultyAbstractPopup(int accountID, String name) {
+
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+
+        List<Abstract> abstracts = this.dl.getFacultyAbstracts(accountID);
+
+        for(Abstract anAbstract: abstracts) {
+
+            panel.add(new JLabel(anAbstract.getTitle()));
+
+            JTextArea body = new JTextArea(anAbstract.getBody());
+            body.setEditable(false);
+
+            panel.add(body);
+        }
+
+        panel.add(new JLabel());
+
+        showPopup(name + " - Abstracts", panel);
     }
 
     /**
