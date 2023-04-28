@@ -773,10 +773,19 @@ public class iste330Group4PresentationLayerGUI {
                     for(String tag: output1) {
                             panel.add(labels3.get(tag));
                     }
-                        List<Interest> interestz = dl.getStudentInterests(ser.getAccountID());
+                    List<Interest> interestz ;
+                    if(account.getRoleID()==1){
+                        interestz = dl.getStudentInterests(ser.getAccountID());
+                    }
+                    else if(account.getRoleID()==2){
+                        interestz = dl.getFacultyInterests(ser.getAccountID());
+                    }
+                    else{
+                       interestz = dl.getGuestInterests(ser.getAccountID());
+                    }
 
                         for (Interest i : interestz){
-                            Interesttz += i.getInterest() + ", ";
+                            Interesttz += i.getInterestID()+" "+i.getInterest() + ", ";
                         }
 
                         if(Interesttz.length() != 0)
