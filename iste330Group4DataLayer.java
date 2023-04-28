@@ -331,7 +331,7 @@ public class iste330Group4DataLayer {
 
             String[] explodedInput = input.toLowerCase().trim().split("\\s+");
 
-            String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a WHERE a.roleID = " + roleID + " AND ";
+            String sql = "SELECT CONCAT(a.firstName, ' ', a.lastName) AS name, a.accountID FROM account AS a WHERE a.roleID = " + roleID + " AND (";
 
             for (int i = 0; i < explodedInput.length; i++) {
 
@@ -340,6 +340,7 @@ public class iste330Group4DataLayer {
             }
 
             sql = sql.substring(0, sql.length() - 4);
+            sql += ")";
 
             this.stmt = this.conn.prepareStatement(sql);
 
