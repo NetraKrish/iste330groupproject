@@ -329,7 +329,7 @@ public class iste330Group4DataLayer {
 
         try {
 
-            String[] explodedInput = input.toLowerCase().split("\\s+");
+            String[] explodedInput = input.toLowerCase().trim().split("\\s+");
 
             String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a WHERE a.roleID = " + roleID + " AND ";
 
@@ -802,9 +802,7 @@ public class iste330Group4DataLayer {
         return addInterest("guest", accountID, interest);
     }
 
-    /*******************
-     * SEARCH INTERESTS
-    *******************/
+    ////////////////////////////////////////////////////////////////////////////
     public List<SearchRecord> searchById(int idd) {
 
         List<SearchRecord> searchRecords = new LinkedList<>();
@@ -843,88 +841,6 @@ public class iste330Group4DataLayer {
 
 
 
-    public static void main(String[] args) {
-
-        Scanner reader = new Scanner(System.in);
-
-        iste330Group4DataLayer dl = new iste330Group4DataLayer();
-
-        System.out.println("username: ");
-        String user = reader.nextLine();
-
-        System.out.println("password: ");
-        String pass = reader.nextLine();
-
-        System.out.println("database (TYPE:'iste330group4'): ");
-        String db = reader.nextLine();
-
-        dl.connect(user, pass, db);
-
-        // test functions below
-
-        System.out.println("\n>> ADDING ACCOUNT TESTS");
-        dl.addAccount("john", "constantine", "yobro", "phone", "Johnny@this.dontmatter", "9999999", "somewhere",
-                "over the rainbow",2);
-        dl.addAccount("sarah", "connor", "johnconnor", "in person visit", "3000@this.dontmatter", "55125851", "bunker",
-                "z892e",2);
-        dl.addAccount("Evan", "Jurdan", "Meow", "phone", "e@some.com", "my#",null,null,1);
-        dl.addAccount("harry", "Styles", "song", "email", "AAAA@A.com", "908264348",null,null,3);
-
-        System.out.println("\n>> ADDING INTEREST TESTS");
-        dl.addStudentInterest(3, "Biology");
-        dl.addStudentInterest(3, "Cars");
-        dl.addStudentInterest(3, "trees");
-        dl.addStudentInterest(4, "birds");
-
-        dl.addFacultyInterest(1, "Biology");
-        dl.addFacultyInterest(2, "Biology");
-
-        System.out.println("\n>> Get Faculty Interest accountID = 1");
-        dl.getFacultyInterests(1).forEach(item -> System.out.println(item));
-
-        // dl.removeFacultyInterest(2); //interest ID
-
-        System.out.println("\n>> ADDING FACULTY ABSTRACTS");
-        dl.addFacultyAbstract(1, "cool", "even cooler.");
-        dl.addFacultyAbstract(1, "coolest", "even beans.");
-        dl.addFacultyAbstract(1, "cooler", "even test.");
-        dl.addFacultyAbstract(1, "Hey Ho",
-                "Hey! Come merry dol! derry dol! My darling! Light goes the weather-wind and the feathered starling. Down along under Hill, shining in the sunlight, Waiting on the doorstep for the cold starlight, There my pretty lady is, River-woman's daughter, Slender as the willow-wand, clearer than the water. Old Tom Bombadil water-lilies bringing Comes hopping home again. Can you hear him singing? Hey! Come merry dol! derry dol! and merry-o! Goldberry, Goldberry, merry yellow berry-o! Poor old Willow-man, you tuck your roots away! Tom's in a hurry now. Evening will follow day. Tom's going home again water-lilies bringing. Hey! Come derry dol! Can you hear me singing?");
-
-        System.out.println("\n>> Get Faculty Abstracts accountID = 1");
-        dl.getFacultyAbstracts(1).forEach(item -> System.out.println(item));
-
-        System.out.println("\n>> Search By Faculty Interest: songs, trees");
-        dl.searchByFacultyInterest("songs,trees").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Faculty Interest: songs, trees, birds");
-        dl.searchByFacultyInterest("songs,trees,birds").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Faculty Interest: Biology");
-        dl.searchByFacultyInterest("Biology").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Faculty Interest: trees");
-        dl.searchByFacultyInterest("trees").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Student Interest: songs, trees");
-        dl.searchByStudentInterest("songs,trees").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Student Interest: Biology");
-        dl.searchByStudentInterest("Biology").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Student Interest: Cars");
-        dl.searchByStudentInterest("Cars").forEach(item -> System.out.println(item));
-
-        System.out.println("\n>> Search By Faculty Abstract: name = 'cool'");
-        dl.searchByFacultyAbstract("cool").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Faculty Name: name = 'Con'");
-        dl.searchByFacultyName("Con").forEach(item -> System.out.println(item));
-        System.out.println("\n>> Search By Student Name: name = 'Evan'");
-        dl.searchByStudentName("Evan").forEach(item -> System.out.println(item));
-
-        // dl.removeFacultyAbstract(1); //abstract ID
-
-        System.out.println("\n>> Get Contact accountID = 1");
-        System.out.println(dl.getContact(1));
-        System.out.println("\n>> Get Faculty Office accountID = 1");
-        System.out.println(dl.getOffice(1));
-
-        dl.close();
-    }
 
     
 
