@@ -1393,25 +1393,127 @@ public class iste330Group4PresentationLayerGUI {
       return panel;
         
       }
-   ////////////////////////////////////////////////////////////////////////////////////////// 
-    public JPanel searchByFaculty() {
-        JPanel panel = new JPanel(new GridLayout(3,1));
-        
+      ///////
+      public JPanel abstractSearchResults(List<SearchRecord> searchRecords) {
+        JPanel panel = new JPanel(new GridLayout(0,3));
+        String title = "  ";
+
         String[] ids = new String[]{
-                  "Main Menu"
+            "Back",
+            "Search again",
+            "Main Menu"
         };
         
         HashMap<String, JButton> buttons = createButtons(ids);
         for(String id: ids) {
               panel.add(buttons.get(id));
          }
-         
-         buttons.get("Main Menu").addActionListener(ignored -> {
+
+         buttons.get("Back").addActionListener(ignored -> {
   
-              showContent(mainMenu());
+            showContent(searchByFaculty());
         });
-        this.frame.pack();
-      return panel;
+   
+        buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+
+            String[] outputs = new String[]{
+                
+                "Account ID, ","Name"
+            };
+            
+            HashMap<String, JLabel> labels2 = createLabels(outputs);
+            
+            for(String tag: outputs) {
+                panel.add(labels2.get(tag));
+            }
+            
+            
+
+            for (SearchRecord ser : searchRecords){
+                
+                
+                String[] output1 = new String[]{
+                        String.valueOf(ser.getAccountID()), ser.getName()
+                        
+                        
+                    };
+                    //System.out.println(String.valueOf(ser.getAccountID())+ ser.getName());
+                    HashMap<String, JLabel> labels3 = createLabels(output1);
+                    for(String tag: output1) {
+                            panel.add(labels3.get(tag));
+                    }
+                    
+                    
+                    
+
+                    
+
+                    
+               
+
+            }
+            
+        return panel;
+    }
+   ////////////////////////////////////////////////////////////////////////////////////////// 
+    public JPanel searchByFaculty() {
+       
+            JPanel panel = new JPanel(new GridLayout(5,2));
+            
+            String[] ids = new String[]{
+                "Main Menu",
+                "Search",
+            };
+            
+            HashMap<String, JButton> buttons = createButtons(ids);
+            for(String id: ids) {
+                  panel.add(buttons.get(id));
+             }
+        
+             String[] tags = new String[]{
+                    
+                    "Abstract: "
+                };
+        
+                HashMap<String, JLabel> labels = createLabels(tags);
+                HashMap<String, JTextField> fields = createTextFields(tags);
+        
+                for(String tag: tags) {
+        
+                    panel.add(labels.get(tag));
+                    panel.add(fields.get(tag));
+                }
+        
+        
+             buttons.get("Main Menu").addActionListener(ignored -> {
+        
+                  showContent(mainMenu());
+              });
+            
+              
+            buttons.get("Search").addActionListener(ignored -> {
+                try{
+                    String search = fields.get("Abstract: ").getText();
+                    
+        
+                    List<SearchRecord> searchRecords = dl.searchByFacultyAbstract(search);
+                    
+                  
+        
+        
+                    showContent(abstractSearchResults(searchRecords));
+                }
+                catch(Exception e){
+                    showPopup("Please input a valid Integer for ID");
+                    showContent(searchByFaculty());
+                }
+            });
+          return panel;
+            
+          
     }
    //////////////////////////////////////////////////////////////////////////////////////////
     
@@ -1548,6 +1650,7 @@ public JPanel searchByID() {
   return panel;
     
   }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -1725,7 +1828,7 @@ public JPanel searchByID() {
      * @param name
      */
     public void showFacultyAbstractPopup(int accountID, String name) {
-
+        
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
@@ -1819,7 +1922,7 @@ public JPanel searchByID() {
 
         return panel;
     }
-
+  
     /**
      * Create Account (MILES KRASSEN EXAMPLE)
      * @return JPanel
