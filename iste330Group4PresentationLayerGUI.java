@@ -739,9 +739,10 @@ public class iste330Group4PresentationLayerGUI {
                         List<Interest> interestz = dl.getStudentInterests(ser.getAccountID());
 
                         for (Interest i : interestz){
-                            Interesttz += i.getInterest();
-                            Interesttz += ", ";
+                            Interesttz += i.getInterest() + ", ";
                         }
+
+                        if(Interesttz.length() != 0)
                             Interesttz = Interesttz.substring(0, (Interesttz.length() - 2));
                             String[] output2 = new String[]{
                                 Interesttz
@@ -1709,7 +1710,9 @@ public JPanel searchByID() {
             output += interest.getInterest() + ", ";
         }
 
-        output = output.substring(0, output.length() - 2);
+        if(output.length() != 0)
+            output = output.substring(0, output.length() - 2);
+
         panel.add(new JLabel(output));
 
         showPopup(name + " - Interests", panel);
