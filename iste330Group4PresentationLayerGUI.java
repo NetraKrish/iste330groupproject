@@ -1651,7 +1651,7 @@ public JPanel searchByID() {
         List<SearchRecord> records = this.dl.searchByFacultyName(field.getText());
 
         //this is the panel to send back
-        panel = new JPanel(new GridLayout(records.size() + 1, 3));
+        panel = new JPanel(new GridLayout(0, 3));
 
         JButton back = new JButton("Back");
 
@@ -1666,7 +1666,7 @@ public JPanel searchByID() {
 
         for(SearchRecord record: records) {
 
-            panel.add(new JLabel(record.getName()));
+            panel.add(new JLabel(String.format("%-5s%-20s", record.getAccountID(), record.getName())));
 
             JButton interestBtn = new JButton("Interests");
             JButton abstractBtn = new JButton("Abstracts");
@@ -1726,23 +1726,31 @@ public JPanel searchByID() {
      */
     public void showFacultyAbstractPopup(int accountID, String name) {
 
-        JPanel panel = new JPanel(new GridLayout(0, 1));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         List<Abstract> abstracts = this.dl.getFacultyAbstracts(accountID);
 
         for(Abstract anAbstract: abstracts) {
 
-            panel.add(new JLabel(anAbstract.getTitle()));
+            JLabel title = new JLabel(anAbstract.getTitle());
+            title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            panel.add(title);
 
             JTextArea body = new JTextArea(anAbstract.getBody());
             body.setEditable(false);
+            body.setLineWrap(true);
+            body.setWrapStyleWord(true);
+            body.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             panel.add(body);
         }
 
-        panel.add(new JLabel());
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setPreferredSize(new Dimension(400, 200));
 
-        showPopup(name + " - Abstracts", panel);
+        showPopup(name + " - Abstracts", scrollPane);
     }
 
     /**
