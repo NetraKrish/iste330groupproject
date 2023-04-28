@@ -319,11 +319,13 @@ public class iste330Group4PresentationLayerGUI {
      //////////////////////////////////////////////////////////////////////////////////////////Evan Jurdan
     public JPanel accountSettings() {
       JPanel panel = new JPanel(new GridLayout(3,1));
-      
-      String[] ids = new String[]{
+    
+        if (account.getRoleID()==2){
+            String[] ids = new String[]{
                 "Main Menu",
                 "Account Actions",
-                "Interest Actions"
+                "Interest Actions",
+                "Abstract Actions"
       };
       
       HashMap<String, JButton> buttons = createButtons(ids);
@@ -344,7 +346,42 @@ public class iste330Group4PresentationLayerGUI {
 
             showContent(interestActions());
         });
+        buttons.get("Abstract Actions").addActionListener(ignored -> {
 
+            showContent(abstractActions());
+        });
+        }
+        else
+        {
+  
+            String[] ids = new String[]{
+                "Main Menu",
+                "Account Actions",
+                "Interest Actions",
+                
+      };
+      
+      HashMap<String, JButton> buttons = createButtons(ids);
+      for(String id: ids) {
+            panel.add(buttons.get(id));
+       }
+       
+       buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+      
+        buttons.get("Account Actions").addActionListener(ignored -> {
+
+            showContent(accountActions());
+        });
+        buttons.get("Interest Actions").addActionListener(ignored -> {
+
+            showContent(interestActions());
+        });
+      
+    
+        }
       return panel;
       
     }
@@ -923,7 +960,230 @@ public class iste330Group4PresentationLayerGUI {
       return panel;
         
       }
-      //////////////////////////////////////////////////////////////////////////////////////////
+      /////
+      public JPanel abstractActions() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+            "Back",
+            "View Abstracts",
+            "Add an Abstract",
+            "Remove an Abstract"
+        };
+        //System.out.println(account.getAccountID());
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(accountSettings());
+          });
+        
+          buttons.get("View Abstracts").addActionListener(ignored -> {
+  
+            showContent(showAbstracts(account.getAccountID())); 
+        });
+          
+        buttons.get("Add an Abstract").addActionListener(ignored -> {
+  
+            showContent(addAbstract());
+        });
+
+          buttons.get("Remove an Abstract").addActionListener(ignored -> {
+  
+            showContent(removeAbstract());
+        });
+      return panel;
+        
+      }
+      private JPanel removeAbstract() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+            "Back",
+            "Remove",
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         String[] tags = new String[]{
+                "Abstract ID"
+            };
+    
+            HashMap<String, JLabel> labels = createLabels(tags);
+            HashMap<String, JTextField> fields = createTextFields(tags);
+
+            for(String tag: tags) {
+
+                panel.add(labels.get(tag));
+                panel.add(fields.get(tag));
+            }
+
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(abstractActions());
+          });
+        
+          
+        buttons.get("Remove").addActionListener(ignored -> {
+            try{
+            int abstractID = Integer.parseInt(fields.get("Abstract ID").getText());
+            
+              
+                
+                    if(this.dl.removeFacultyAbstract(abstractID) > 0) {
+
+                        showPopup("Successfully Removed Abstract!");}
+                    
+            showContent(abstractActions());
+        }
+        catch(Exception e){
+            showPopup("Please input a valid Integer for ID");
+            showContent(removeAbstract());
+        }
+    });
+        
+
+      return panel;
+    }
+
+    private JPanel addAbstract() {
+        JPanel panel = new JPanel(new GridLayout(3,1));
+        
+        String[] ids = new String[]{
+            "Back",
+            "Add",
+        };
+        
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+
+         String[] tags = new String[]{
+                "Abstract Title", "Abstract Body"
+            };
+    
+            HashMap<String, JLabel> labels = createLabels(tags);
+            HashMap<String, JTextField> fields = createTextFields(tags);
+
+            for(String tag: tags) {
+
+                panel.add(labels.get(tag));
+                panel.add(fields.get(tag));
+            }
+
+
+         buttons.get("Back").addActionListener(ignored -> {
+  
+              showContent(abstractActions());
+          });
+        
+          
+        buttons.get("Add").addActionListener(ignored -> {
+            String abtitle = fields.get("Abstract Title").getText();
+            String abbody = fields.get("Abstract Body").getText();
+            int acID = account.getAccountID();
+              
+                
+                    if(this.dl.addFacultyAbstract(acID,abtitle, abbody) > 0) {
+
+                        showPopup("Successfully Added Abstract!");
+                    }
+            
+            showContent(abstractActions());
+        });
+
+      return panel;
+        
+    }
+
+    private JPanel showAbstracts(int accountID) {
+        JPanel panel = new JPanel(new GridLayout(0,3));
+        String abs = "  ";
+
+        String[] ids = new String[]{
+            "Back",
+            "Main Menu"
+        };
+        JLabel filler = new JLabel(" ");
+
+        HashMap<String, JButton> buttons = createButtons(ids);
+        for(String id: ids) {
+              panel.add(buttons.get(id));
+         }
+         panel.add(filler);
+         buttons.get("Back").addActionListener(ignored -> {
+  
+            showContent(abstractActions());
+        });
+        
+        buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+
+            String[] outputs = new String[]{
+                
+                "Account ID, ","Name, ","Abstracts "
+            };
+            
+            HashMap<String, JLabel> labels2 = createLabels(outputs);
+            
+            for(String tag: outputs) {
+                panel.add(labels2.get(tag));
+            }
+            
+            List<SearchRecord> searchRecords = dl.searchById(account.getAccountID());
+
+            for (SearchRecord ser : searchRecords){              
+                System.out.println(account.getAccountID());
+                String[] output1 = new String[]{
+                        String.valueOf(ser.getAccountID()), ser.getName()
+                        
+                        
+                    };
+                    HashMap<String, JLabel> labels3 = createLabels(output1);
+                    for(String tag: output1) {
+                            panel.add(labels3.get(tag));
+                    }
+                        List<Abstract> abstracts = dl.getFacultyAbstracts(ser.getAccountID());
+
+                        for (Abstract i : abstracts){
+                            abs += (i.getAbstractID()+" "+i.getTitle() + ", ");
+                        }
+
+                        if(abs.length() != 0)
+                            abs = abs.substring(0, (abs.length() - 2));
+                            String[] output2 = new String[]{
+                                abs
+                            };
+                            
+                            HashMap<String, JLabel> labels4 = createLabels(output2);
+                            for(String tag: output2) {
+                                panel.add(labels4.get(tag));
+                            }
+                        
+                
+                        
+                
+                    
+
+            }
+            
+
+            this.frame.pack();
+        return panel;
+   
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
     public JPanel searchByInterest() {
         JPanel panel = new JPanel(new GridLayout(3,1));
         
