@@ -1253,49 +1253,42 @@ public class iste330Group4PresentationLayerGUI {
                     for(String tag: output1) {
                             panel.add(labels3.get(tag));
                     }
+                    
                     if( type == 1){
                         List<Interest> interestz = dl.getStudentInterests(ser.getAccountID());
 
                         for (Interest i : interestz){
-                            Interesttz += i.getInterest();
-                            Interesttz += ", ";
+                            Interesttz += i.getInterest() + ", ";
                         }
-                            Interesttz = Interesttz.substring(0, (Interesttz.length() - 2));
-                            String[] output2 = new String[]{
-                                Interesttz
-                            };
-                            
-                            HashMap<String, JLabel> labels4 = createLabels(output2);
-                            for(String tag: output2) {
-                                panel.add(labels4.get(tag));
-                            }
                         
-                
+                        if(Interesttz.length() != 0)
+                            Interesttz = Interesttz.substring(0, (Interesttz.length() - 2));
+
+                        JLabel interestLabel = new JLabel(Interesttz);
+                        panel.add(interestLabel);
+
+                        Interesttz = "";
+
                     }
                     if( type == 2){
                         List<Interest> interestz = dl.getFacultyInterests(ser.getAccountID());
 
                         for (Interest i : interestz){
-                            Interesttz += i.getInterest();
-                            Interesttz += ", ";
+                            Interesttz += i.getInterest() + ", ";
                         }
+
+                        if(Interesttz.length() != 0)
                             Interesttz = Interesttz.substring(0, (Interesttz.length() - 2));
-                            String[] output2 = new String[]{
-                                Interesttz
-                            };
-                            
-                            HashMap<String, JLabel> labels4 = createLabels(output2);
-                            for(String tag: output2) {
-                                panel.add(labels4.get(tag));
-                            }
+
+                        JLabel interestLabel = new JLabel(Interesttz);
+                        panel.add(interestLabel);
+
+                        Interesttz = "";
                         
-                
                     }
 
             }
             
-
-            this.frame.pack();
         return panel;
     }
     //////////////////////////////////////////////////////////////////////////////////////////
