@@ -1,5 +1,6 @@
 import objects.Abstract;
 import objects.Account;
+import objects.Contact;
 import objects.SearchRecord;
 import objects.Interest;
 
@@ -15,6 +16,7 @@ public class iste330Group4PresentationLayerGUI {
 
     private iste330Group4DataLayer dl;
     private Account account;
+    private Contact contact;
 
     private JFrame frame;
     private JPanel contentPanel;
@@ -23,6 +25,7 @@ public class iste330Group4PresentationLayerGUI {
 
         this.dl = new iste330Group4DataLayer();
         this.account = null;
+        this.contact = null;
 
         this.frame = new JFrame();
         this.contentPanel = new JPanel();
@@ -335,7 +338,7 @@ public class iste330Group4PresentationLayerGUI {
       
         buttons.get("Account Actions").addActionListener(ignored -> {
 
-            showContent(ERROR());
+            showContent(accountActions());
         });
         buttons.get("Interest Actions").addActionListener(ignored -> {
 
@@ -345,6 +348,306 @@ public class iste330Group4PresentationLayerGUI {
       return panel;
       
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel accountActions() {
+      JPanel panel = new JPanel(new GridLayout(5,1));
+      
+      String[] ids = new String[]{
+                "Main Menu",
+                "View Account Info",
+                "Change Password",
+                "Edit Account",
+                "Edit Contact Info"
+      };
+      
+      HashMap<String, JButton> buttons = createButtons(ids);
+      for(String id: ids) {
+            panel.add(buttons.get(id));
+       }
+       
+       
+       buttons.get("Main Menu").addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+        
+        buttons.get("View Account Info").addActionListener(ignored -> {
+
+            showContent(viewAccInfo());
+        });
+        
+         buttons.get("Change Password").addActionListener(ignored -> {
+
+            showContent(changePassword());
+        });
+        
+        buttons.get("Edit Account").addActionListener(ignored -> {
+
+            showContent(editAccount());
+        });
+        buttons.get("Edit Contact Info").addActionListener(ignored -> {
+
+            showContent(editContactInfo());
+        });
+        
+    
+    
+      return panel;
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel viewAccInfo() {
+      JPanel panel = new JPanel(new GridLayout(10,1));
+      Contact contact = this.dl.getContact(this.account.getAccountID());
+      
+      String[] ids = new String[]{
+                "Account Actions"
+      };
+      
+      HashMap<String, JButton> buttons = createButtons(ids);
+      for(String id: ids) {
+            panel.add(buttons.get(id));
+      }
+      
+      buttons.get("Account Actions").addActionListener(ignored -> {
+
+            showContent(accountActions());
+      });
+      
+
+      String[] words = new String[]{
+          "**Account Details**",
+          "First Name: " + account.getFirstName(),
+          "Last Name: " + account.getLastName(),
+          "Preferred Contact: " + account.getPreferedContact(),
+          "Account Type: " + switch(account.getRoleID()) {
+                                    case 1 -> "Student";
+                                    case 2 -> "Faculty";
+                                    case 3 -> "Guest";
+                                    default -> "Unknown? Hmm...";},
+          "**Contact Information**",
+          "Email: " + contact.getEmail(),
+          "Phone: " + contact.getPhone()
+          
+      };
+      
+      HashMap<String, JLabel> labels = createLabels(words);
+         for(String word: words) {
+            panel.add(labels.get(word));
+      }
+    
+      return panel;
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    public JPanel changePassword() {
+      JPanel panel = new JPanel(new GridLayout(10,2));
+      
+      String[] ids = new String[]{
+                "Account Actions",
+                "Set Password"
+      };
+      
+      HashMap<String, JButton> buttons = createButtons(ids);
+      for(String id: ids) {
+            panel.add(buttons.get(id));
+      }
+      
+      
+       String[] tags = new String[]{
+           "Enter New Password:"   
+       };
+       
+       HashMap<String, JLabel> labels = createLabels(tags);
+       HashMap<String, JTextField> fields = createTextFields(tags);
+       
+       for(String tag: tags) {
+         panel.add(labels.get(tag));
+         panel.add(fields.get(tag));
+       }
+       
+      buttons.get("Account Actions").addActionListener(ignored -> {
+
+            showContent(accountActions());
+      });
+      
+      buttons.get("Set Password").addActionListener(ignored -> {
+         int acID = account.getAccountID();
+         String pswd = fields.get("Enter New Password:").getText();
+         if( this.dl.updatePassword(this.account.getAccountID(), fields.get("Enter New Password:").getText()) > 0)
+            showPopup("Successfully Updated Password!");
+            
+      });
+       
+      return panel;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+      public JPanel editAccount() {
+         JPanel panel = new JPanel(new GridLayout(10,2));
+         
+         
+         
+         String[] ids = new String[]{
+                   "Account Actions",
+                   "Save"
+         };
+         
+         HashMap<String, JButton> buttons = createButtons(ids);
+         for(String id: ids) {
+               panel.add(buttons.get(id));
+         }
+         
+         
+         String[] tags = new String[]{
+                   "First Name: ",
+                   "Last Name: "
+         };
+         HashMap<String, JLabel> labels = createLabels(tags);
+         HashMap<String, JTextField> fields = createTextFields(tags);
+         
+         for(String tag: tags) {
+               panel.add(labels.get(tag));
+               panel.add(fields.get(tag));
+         }
+         String[] tags2 = new String[]{
+                   "Preferred Contact: "
+         };
+         
+         HashMap<String, JLabel> labels2 = createLabels(tags2);
+         
+         for(String t: tags2) {
+               panel.add(labels2.get(t));
+         }
+         
+         String[] radioTags = new String[]{
+                   "Phone",
+                   "Email"
+         };
+         
+         HashMap<String, JRadioButton> conts = createRadioButtons(radioTags);
+         
+         for(String radioTag: radioTags) {
+   
+               conts.put(radioTag, new JRadioButton(radioTag));
+         }
+         
+         ButtonGroup contactGroup = createButtonGroup(conts);
+         for(JRadioButton cont: conts.values()) {
+   
+               contactGroup.add(cont);
+               panel.add(cont);
+         }
+         
+         
+          buttons.get("Account Actions").addActionListener(ignored -> {
+   
+               showContent(accountActions());
+         });
+         
+         buttons.get("Save").addActionListener(ignored -> {
+               String selected = "";
+               int acID = account.getAccountID();
+               String fname = fields.get("First Name: ").getText();
+               String lname = fields.get("Last Name: ").getText();
+               
+               if(!fields.get("First Name: ").getText().isEmpty()) {
+                  this.account.setFirstName(fname.trim());
+                  showPopup("Saved Successfully!");
+               }
+               
+               if(!fields.get("Last Name: ").getText().isEmpty()) {
+                  this.account.setLastName(lname.trim());
+                  showPopup("Saved Successfully!");
+               }
+               
+               
+              //radio
+              for(JRadioButton cont: conts.values()) {
+                    if(cont.isSelected()){
+                       selected = cont.getText();
+                       break;
+                    }
+               }
+               
+               if(!getSelectedRadioValue(conts).equals("")) {
+                     this.account.setPreferedContact(switch (selected) {
+                        case "Email" -> "Email";
+                        case "Phone" -> "Phone";
+                        default -> null;
+                     });
+                     showPopup("Saved Successfully!");
+                 }
+                                 
+         });
+         
+         
+         return panel;
+      
+      }
+   ///////////////////////////////////////////////////////////////////////////////////////////////
+   public JPanel editContactInfo() {
+      JPanel panel = new JPanel(new GridLayout(10,2));
+      Contact contact = this.dl.getContact(this.account.getAccountID());
+      
+      String[] ids = new String[]{
+                "Account Actions",
+                "Save"
+      };
+      
+      HashMap<String, JButton> buttons = createButtons(ids);
+      for(String id: ids) {
+            panel.add(buttons.get(id));
+      }
+      
+      String[] tags = new String[]{
+                "Email: ",
+                "Phone: "
+      };
+      HashMap<String, JLabel> labels = createLabels(tags);
+      HashMap<String, JTextField> fields = createTextFields(tags);
+      
+      for(String tag: tags) {
+            panel.add(labels.get(tag));
+            panel.add(fields.get(tag));
+      }
+
+      
+
+      
+      buttons.get("Account Actions").addActionListener(ignored -> {
+
+            showContent(accountActions());
+      });
+      
+      buttons.get("Save").addActionListener(ignored -> {
+            int acID = account.getAccountID();
+            String email = fields.get("Email: ").getText();
+            String phone = fields.get("Phone: ").getText();
+            
+             if(!fields.get("Email: ").getText().isEmpty()) {
+                contact.setEmail(email);
+                //showPopup("Saved Successfully!");
+             }
+             
+              if(!fields.get("Phone: ").getText().isEmpty()) {
+                contact.setPhone(phone);
+                //showPopup("Saved Successfully!");
+             }
+
+           
+            if(this.dl.updateContact(contact.getAccountID(), contact.getEmail(), contact.getPhone()) > 0)
+            showPopup("Saved Successfully!");
+            
+      
+     
+                                         
+      });
+
+
+      
+      
+      
+      return panel;
+   }
+
     //////////////////////////////////////////////////////////////////////////////////////////
     public JPanel interestActions() {
         JPanel panel = new JPanel(new GridLayout(3,1));
