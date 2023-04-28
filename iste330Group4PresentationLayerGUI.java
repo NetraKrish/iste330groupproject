@@ -264,7 +264,8 @@ public class iste330Group4PresentationLayerGUI {
                 "Search By Interests",
                 "Search By Name",
                 "Search By ID",
-                "Search By Faculty Abstract"
+                "Search By Faculty Abstract",
+                "Search Faculty Info"
         };
 
         HashMap<String, JButton> buttons = createButtons(ids);
@@ -303,6 +304,10 @@ public class iste330Group4PresentationLayerGUI {
         buttons.get("Search By Faculty Abstract").addActionListener(ignored -> {
 
             showContent(searchByFaculty());
+        });
+        buttons.get("Search Faculty Info").addActionListener(ignored -> {
+
+            showContent(searchFacultyInfo());
         });
 
         return panel;
@@ -875,8 +880,8 @@ public class iste330Group4PresentationLayerGUI {
 
             buttons.get("Search Faculty").addActionListener(ignored -> {
 
-                showContent(searchByFacultyName());
-//            showContent(searchFacultyByName());
+                
+            showContent(searchFacultyByName());
             });
     
       return panel;
@@ -1329,23 +1334,21 @@ public JPanel searchByID() {
      * Search By Faculty Name (MILES KRASSEN EXAMPLE)
      * @return JPanel
      */
-    public JPanel searchByFacultyName() {
+    public JPanel searchFacultyInfo() {
 
         //setup popup panel
         JPanel panel = new JPanel(new GridLayout(1,1));
-
+        
         JTextField field = new JTextField("");
         panel.add(field);
 
         showPopup("Search By Faculty Name", panel);
 
         //validate
-        do {
+        if(field.getText().equals("")){
 
-            showPopup("Search By Faculty Name", panel);
-
-        }while (field.getText().length() == 0 || field.getText().matches("[\\s]+"));
-
+            return mainMenu();
+        }
         //records returned
         List<SearchRecord> records = this.dl.searchByFacultyName(field.getText());
 
@@ -1403,10 +1406,15 @@ public JPanel searchByID() {
             default -> this.dl.getGuestInterests(accountID);
         };
 
+        String output = "";
+
         for(Interest interest: interests) {
 
-            panel.add(new JLabel(interest.getInterest()));
+            output += interest.getInterest() + ", ";
         }
+
+        output = output.substring(0, output.length() - 2);
+        panel.add(new JLabel(output));
 
         showPopup(name + " - Interests", panel);
     }
