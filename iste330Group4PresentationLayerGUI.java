@@ -431,6 +431,7 @@ public class iste330Group4PresentationLayerGUI {
     public JPanel viewAccInfo() {
       JPanel panel = new JPanel(new GridLayout(0,1));
       Contact contact = this.dl.getContact(this.account.getAccountID());
+      Office location = this.dl.getOffice(this.account.getAccountID());
       
       String[] ids = new String[]{
                 "Account Actions"
@@ -456,7 +457,19 @@ public class iste330Group4PresentationLayerGUI {
                                     case 1 -> "Student";
                                     case 2 -> "Faculty";
                                     case 3 -> "Guest";
-                                    default -> "Unknown? Hmm...";},
+                                    default -> "Unknown? Hmm...";}
+          
+      };
+      
+      String[] words2 = new String[]{
+          "Building: " + location.getBuilding(),
+          "Office Number: " + location.getNumber()
+          
+      };
+      
+      
+      
+      String[] words3 = new String[]{
           "**Contact Information**",
           "Email: " + contact.getEmail(),
           "Phone: " + contact.getPhone()
@@ -467,6 +480,18 @@ public class iste330Group4PresentationLayerGUI {
          for(String word: words) {
             panel.add(labels.get(word));
       }
+      if (this.account.getRoleID() == 2) {
+         HashMap<String, JLabel> labels2 = createLabels(words2);
+            for(String word2: words2) {
+               panel.add(labels2.get(word2));
+         }
+      }
+      
+      HashMap<String, JLabel> labels3 = createLabels(words3);
+         for(String word3: words3) {
+            panel.add(labels3.get(word3));
+      }
+      
     
       return panel;
     }
@@ -514,9 +539,9 @@ public class iste330Group4PresentationLayerGUI {
     }
     //////////////////////////////////////////////////////////////////////////////////////////
       public JPanel editAccount() {
-         JPanel panel = new JPanel(new GridLayout(10,2));
-         
-         
+         JPanel panel = new JPanel(new GridLayout(20,2));
+         //Account account = this.dl.getAccount(this.account.getAccountID());
+         Office location = this.dl.getOffice(this.account.getAccountID());
          
          String[] ids = new String[]{
                    "Account Actions",
@@ -555,6 +580,16 @@ public class iste330Group4PresentationLayerGUI {
                    "Email"
          };
          
+         String[] facTags = new String[]{
+                   "Building: ",
+                   "Office Number: "
+         };
+         
+         HashMap<String, JLabel> labels3 = createLabels(facTags);
+         HashMap<String, JTextField> fields3 = createTextFields(facTags);
+
+         
+         
          HashMap<String, JRadioButton> conts = createRadioButtons(radioTags);
          
          for(String radioTag: radioTags) {
@@ -569,6 +604,12 @@ public class iste330Group4PresentationLayerGUI {
                panel.add(cont);
          }
          
+         if (this.account.getRoleID() == 2) {
+            for(String facTag: facTags) {
+                  panel.add(labels3.get(facTag));
+                  panel.add(fields3.get(facTag));
+            }
+         }
          
           buttons.get("Account Actions").addActionListener(ignored -> {
    
@@ -576,19 +617,34 @@ public class iste330Group4PresentationLayerGUI {
          });
          
          buttons.get("Save").addActionListener(ignored -> {
+            
+         
+               //Office location = this.dl.getOffice(this.account.getAccountID());
                String selected = "";
                int acID = account.getAccountID();
                String fname = fields.get("First Name: ").getText();
                String lname = fields.get("Last Name: ").getText();
+               String build = fields3.get("Building: ").getText();
+               String loc = fields3.get("Office Number: ").getText();
                
                if(!fields.get("First Name: ").getText().isEmpty()) {
                   this.account.setFirstName(fname.trim());
-                  showPopup("Saved Successfully!");
+                  
                }
                
                if(!fields.get("Last Name: ").getText().isEmpty()) {
                   this.account.setLastName(lname.trim());
-                  showPopup("Saved Successfully!");
+                  
+               }
+               
+               if(!fields3.get("Building: ").getText().isEmpty()) {
+                  location.setBuilding(build.trim());
+                  
+               }
+               
+               if(!fields3.get("Office Number: ").getText().isEmpty()) {
+                  location.setNumber(loc.trim());
+                  
                }
                
                
@@ -606,8 +662,16 @@ public class iste330Group4PresentationLayerGUI {
                         case "Phone" -> "Phone";
                         default -> null;
                      });
-                     showPopup("Saved Successfully!");
-                 }
+                     
+                     
+                }
+               
+               int test = this.dl.updateOffice(location.getAccountID(), location.getBuilding(), location.getNumber());
+               if(this.dl.updateAccount(acID, fname, lname, selected) > 0 || test > 0)
+               showPopup("Saved Successfully!");
+               
+
+ 
                                  
          });
          
@@ -657,21 +721,16 @@ public class iste330Group4PresentationLayerGUI {
             
              if(!fields.get("Email: ").getText().isEmpty()) {
                 contact.setEmail(email);
-                //showPopup("Saved Successfully!");
              }
              
               if(!fields.get("Phone: ").getText().isEmpty()) {
-                contact.setPhone(phone);
-                //showPopup("Saved Successfully!");
+                contact.setPhone(phone);  
              }
 
            
             if(this.dl.updateContact(contact.getAccountID(), contact.getEmail(), contact.getPhone()) > 0)
             showPopup("Saved Successfully!");
-            
-      
-     
-                                         
+                              
       });
 
 
