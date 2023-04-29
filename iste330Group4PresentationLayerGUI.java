@@ -1,11 +1,7 @@
-import objects.Abstract;
-import objects.Account;
-import objects.Contact;
-import objects.SearchRecord;
-import objects.Interest;
+import objects.*;
 
 import javax.swing.*;
-import javax.swing.text.html.HTML.Tag;
+import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
 import java.util.List;
@@ -84,7 +80,7 @@ public class iste330Group4PresentationLayerGUI {
 
     public void showPopupError(String title, String e) {
 
-        JLabel error = new JLabel("Stick to the rules, butterboy. Error: " + e);
+        JLabel error = new JLabel("Error: " + e);
         
         JOptionPane.showMessageDialog(null, error, title, JOptionPane.INFORMATION_MESSAGE);
     }
@@ -318,7 +314,7 @@ public class iste330Group4PresentationLayerGUI {
     
      //////////////////////////////////////////////////////////////////////////////////////////Evan Jurdan
     public JPanel accountSettings() {
-      JPanel panel = new JPanel(new GridLayout(3,1));
+      JPanel panel = new JPanel(new GridLayout(0,1));
     
         if (account.getRoleID()==2){
             String[] ids = new String[]{
@@ -387,7 +383,7 @@ public class iste330Group4PresentationLayerGUI {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////
     public JPanel accountActions() {
-      JPanel panel = new JPanel(new GridLayout(5,1));
+      JPanel panel = new JPanel(new GridLayout(0,1));
       
       String[] ids = new String[]{
                 "Main Menu",
@@ -433,7 +429,7 @@ public class iste330Group4PresentationLayerGUI {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////
     public JPanel viewAccInfo() {
-      JPanel panel = new JPanel(new GridLayout(10,1));
+      JPanel panel = new JPanel(new GridLayout(0,1));
       Contact contact = this.dl.getContact(this.account.getAccountID());
       
       String[] ids = new String[]{
@@ -476,7 +472,7 @@ public class iste330Group4PresentationLayerGUI {
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
     public JPanel changePassword() {
-      JPanel panel = new JPanel(new GridLayout(10,2));
+      JPanel panel = new JPanel(new GridLayout(0,2));
       
       String[] ids = new String[]{
                 "Account Actions",
@@ -687,7 +683,7 @@ public class iste330Group4PresentationLayerGUI {
 
     //////////////////////////////////////////////////////////////////////////////////////////
     public JPanel interestActions() {
-        JPanel panel = new JPanel(new GridLayout(3,1));
+        JPanel panel = new JPanel(new GridLayout(0,1));
         
         String[] ids = new String[]{
             "Back",
@@ -971,7 +967,7 @@ public class iste330Group4PresentationLayerGUI {
       }
       /////
       public JPanel abstractActions() {
-        JPanel panel = new JPanel(new GridLayout(3,1));
+        JPanel panel = new JPanel(new GridLayout(0,1));
         
         String[] ids = new String[]{
             "Back",
@@ -2023,13 +2019,19 @@ public JPanel searchByID() {
         List<SearchRecord> records = this.dl.searchByFacultyName(field.getText());
 
         //this is the panel to send back
-        panel = new JPanel(new GridLayout(0, 3));
+        panel = new JPanel(new GridLayout(0, 4));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.WHITE);
 
         JButton back = new JButton("Back");
 
         panel.add(back);
-        panel.add(new JLabel());
-        panel.add(new JLabel());
+
+        //spacer
+        for(int i = 0; i < 7; i++) {
+
+            panel.add(new JLabel());
+        }
 
         back.addActionListener(ignored -> {
 
@@ -2038,13 +2040,18 @@ public JPanel searchByID() {
 
         for(SearchRecord record: records) {
 
-            panel.add(new JLabel(String.format("%-5s%-20s", record.getAccountID(), record.getName())));
+            JLabel name = new JLabel(String.format("%-5s%s", "[" + record.getAccountID() + "]", record.getName()));
+            name.setBorder(new EmptyBorder(0, 0, 0, 15));
+
+            panel.add(name);
 
             JButton interestBtn = new JButton("Interests");
             JButton abstractBtn = new JButton("Abstracts");
+            JButton infoBtn = new JButton("Info");
 
             panel.add(interestBtn);
             panel.add(abstractBtn);
+            panel.add(infoBtn);
 
             interestBtn.addActionListener(ignored -> {
 
@@ -2055,9 +2062,32 @@ public JPanel searchByID() {
 
                 showFacultyAbstractPopup(record.getAccountID(), record.getName());
             });
+
+            infoBtn.addActionListener(ignored -> {
+
+                showFacultyInfoPopup(record.getAccountID(), record.getName());
+            });
         }
 
         return panel;
+    }
+
+    public void showFacultyInfoPopup(int accountID, String name) {
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(0, 1));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.WHITE);
+
+        Office location = this.dl.getOffice(accountID);
+        Contact contact = this.dl.getContact(accountID);
+
+        panel.add(new JLabel("Email: " + contact.getEmail()));
+        panel.add(new JLabel("Phone: " + contact.getPhone()));
+        panel.add(new JLabel("Building: " + location.getBuilding()));
+        panel.add(new JLabel("Office: " + location.getNumber()));
+
+        showPopup(name + " - Info", panel);
     }
 
     /**
@@ -2069,6 +2099,8 @@ public JPanel searchByID() {
     public void showInterestsPopup(int accountID, String name, int role) {
 
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         List<Interest> interests = switch (role) {
             case 1 -> this.dl.getStudentInterests(accountID);
@@ -2100,15 +2132,22 @@ public JPanel searchByID() {
         
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(8, 8, 10, 15));
+        panel.setBackground(Color.WHITE);
 
         List<Abstract> abstracts = this.dl.getFacultyAbstracts(accountID);
 
         for(Abstract anAbstract: abstracts) {
 
-            JLabel title = new JLabel(anAbstract.getTitle());
-            title.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JPanel titleWrapper = new JPanel(new BorderLayout());
+            titleWrapper.setBorder(new EmptyBorder(8, 8, 0, 8));
+            titleWrapper.setBackground(Color.WHITE);
+            titleWrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            panel.add(title);
+            JLabel title = new JLabel(anAbstract.getTitle());
+            titleWrapper.add(title, BorderLayout.PAGE_START);
+
+            panel.add(titleWrapper);
 
             JTextArea body = new JTextArea(anAbstract.getBody());
             body.setEditable(false);
@@ -2116,11 +2155,23 @@ public JPanel searchByID() {
             body.setWrapStyleWord(true);
             body.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+            body.setBorder(new EmptyBorder(4,8,8,8));
+
             panel.add(body);
         }
 
-        JScrollPane scrollPane = new JScrollPane(panel);
-        scrollPane.setPreferredSize(new Dimension(400, 200));
+        JPanel wrapper = new JPanel(new GridBagLayout());
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.weightx = 1;
+        constraints.anchor = GridBagConstraints.NORTH;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+
+        wrapper.add(panel, constraints);
+
+        JScrollPane scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setPreferredSize(new Dimension(400, 300));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(10);
 
         showPopup(name + " - Abstracts", scrollPane);
     }
@@ -2206,24 +2257,28 @@ public JPanel searchByID() {
 
         ButtonGroup roleGroup = createButtonGroup(roleRadioButtons);//needed for grouping radio buttons, not used anywhere else.
 
-        do {
+        //createRadioPanel() adds and formats the radio buttons into their own panel
+        showPopup("Pick a Role", createRadioPanel(roleRadioButtons));
 
-            //createRadioPanel() adds and formats the radio buttons into their own panel
-            showPopup("Pick a Role", createRadioPanel(roleRadioButtons));
+        if(getSelectedRadioValue(roleRadioButtons).equals("")) {
 
-        }while (getSelectedRadioValue(roleRadioButtons).equals(""));
+            showPopupError("Invalid Choice", "Must Select a Role!");
+            return loginMenu();
+        }
 
         //choose preferred contact radio button popup
         HashMap<String, JRadioButton> preferredContactRadioButtons = createRadioButtons(new String[]{"Phone", "Email"});
 
         ButtonGroup preferredContactGroup = createButtonGroup(preferredContactRadioButtons);//needed for grouping radio buttons, not used anywhere else.
 
-        do {
+        //createRadioPanel() adds and formats the radio buttons into their own panel
+//        showPopup("Pick a Preferred Contact Method", createRadioPanel(preferredContactRadioButtons));
 
-            //createRadioPanel() adds and formats the radio buttons into their own panel
-            showPopup("Pick a Preferred Contact Method", createRadioPanel(preferredContactRadioButtons));
-
-        }while (getSelectedRadioValue(preferredContactRadioButtons).equals(""));
+//        if(getSelectedRadioValue(preferredContactRadioButtons).equals("")) {
+//
+//            showPopupError("Invalid Choice", "Must Select a Role!");
+//            return loginMenu();
+//        }
 
         //tags used as IDs for and labels for creating JLabels and JTextFields
         String[] tags = new String[]{
@@ -2231,6 +2286,7 @@ public JPanel searchByID() {
                 "Last Name",
                 "Email",
                 "Phone Number",
+                "Preferred Contact Method",
                 "Building",
                 "Office Number",
                 "New Password"
@@ -2248,7 +2304,15 @@ public JPanel searchByID() {
                 continue;
 
             panel.add(labels.get(id));
-            panel.add(fields.get(id));
+
+            if(!id.equals("Preferred Contact Method")){
+
+                panel.add(fields.get(id));
+
+            }else {
+
+                panel.add(createRadioPanel(preferredContactRadioButtons));
+            }
         }
 
         //add the save button
@@ -2270,6 +2334,12 @@ public JPanel searchByID() {
         save.addActionListener(ignored -> {
 
             String preferredContact = getSelectedRadioValue(preferredContactRadioButtons);
+
+            if(preferredContact.equals("")) {
+
+                showPopupError("Invalid Choice", "Must Select a Preferred Contact Method!");
+                return;
+            }
 
             int roleID = switch (getSelectedRadioValue(roleRadioButtons)) {
                 case "Student" -> 1;

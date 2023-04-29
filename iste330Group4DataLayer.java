@@ -336,7 +336,7 @@ public class iste330Group4DataLayer {
             for (int i = 0; i < explodedInput.length; i++) {
 
                 explodedInput[i] = explodedInput[i].trim();
-                sql += "LOWER(CONCAT(firstName, ' ', lastName)) LIKE CONCAT('%', ?, '%') OR ";
+                sql += "LOWER(CONCAT(firstName, ' ', lastName)) LIKE CONCAT('%', ?, '%') AND ";
             }
 
             sql = sql.substring(0, sql.length() - 4);
