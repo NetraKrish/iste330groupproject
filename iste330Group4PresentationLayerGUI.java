@@ -1022,6 +1022,7 @@ public class iste330Group4PresentationLayerGUI {
         
 
       return panel;
+      
         
       }
       /////
@@ -1616,6 +1617,7 @@ public class iste330Group4PresentationLayerGUI {
             
         return panel;
     }
+
     //////////////////////////////////////////////////////////////////////////////////////////
     public JPanel searchFacultyByName() {
         JPanel panel = new JPanel(new GridLayout(5,2));
@@ -1785,60 +1787,89 @@ public class iste330Group4PresentationLayerGUI {
     }
    ////////////////////////////////////////////////////////////////////////////////////////// 
     public JPanel searchByFaculty() {
-       
-            JPanel panel = new JPanel(new GridLayout(5,2));
+        JPanel panel = new JPanel(new GridLayout(1,1));
+        
+        JTextField field = new JTextField("");
+        panel.add(field);
+
+        showPopup("Search By Faculty Abstract", panel);
+
+        //validate
+        if(field.getText().equals("")){
+
+            showPopupError("Invalid Abstract Name!");
+            return mainMenu();
+        }
+        //records returned
+        JLabel absname = new JLabel(field.getText());
+        List<SearchRecord> records = this.dl.searchByFacultyAbstract(field.getText());
+
+        //this is the panel to send back
+        panel = new JPanel(new GridLayout(0, 5));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.setBackground(Color.WHITE);
+
+        JButton back = new JButton("Back");
+
+        panel.add(back);
+
+        //spacer
+        for(int i = 0; i < 9; i++) {
+
+            panel.add(new JLabel());
+        }
+        String[] outputs = new String[]{
+                
+            "Name","Abstract Title"
+        };
+        HashMap<String, JLabel> labels2 = createLabels(outputs);
             
-            String[] ids = new String[]{
-                "Main Menu",
-                "Search",
-            };
-            
-            HashMap<String, JButton> buttons = createButtons(ids);
-            for(String id: ids) {
-                  panel.add(buttons.get(id));
-             }
-        
-             String[] tags = new String[]{
-                    
-                    "Abstract: "
-                };
-        
-                HashMap<String, JLabel> labels = createLabels(tags);
-                HashMap<String, JTextField> fields = createTextFields(tags);
-        
-                for(String tag: tags) {
-        
-                    panel.add(labels.get(tag));
-                    panel.add(fields.get(tag));
-                }
-        
-        
-             buttons.get("Main Menu").addActionListener(ignored -> {
-        
-                  showContent(mainMenu());
-              });
-            
-              
-            buttons.get("Search").addActionListener(ignored -> {
-                try{
-                    String search = fields.get("Abstract: ").getText();
-                    
-                  
-                    List<SearchRecord> searchRecords = dl.searchByFacultyAbstract(search);
-                    
-                  
-        
-        
-                    showContent(abstractSearchResults(searchRecords, search));
-                }
-                catch(Exception e){
-                    showPopup("Please input a valid Integer for ID");
-                    showContent(searchByFaculty());
-                }
+        for(String tag: outputs) {
+            panel.add(labels2.get(tag));
+        }
+
+        back.addActionListener(ignored -> {
+
+            showContent(mainMenu());
+        });
+        //spacer
+        for(int i = 0; i < 3; i++) {
+
+            panel.add(new JLabel());
+        }
+        for(SearchRecord record: records) {
+
+            JLabel name = new JLabel(String.format("%-5s%s", "[" + record.getAccountID() + "]", record.getName()));
+            name.setBorder(new EmptyBorder(0, 0, 0, 15));
+
+            panel.add(name);
+            panel.add(absname);
+           
+
+            JButton interestBtn = new JButton("Interests");
+            JButton abstractBtn = new JButton("Abstracts");
+            JButton infoBtn = new JButton("Info");
+
+            panel.add(interestBtn);
+            panel.add(abstractBtn);
+            panel.add(infoBtn);
+
+            interestBtn.addActionListener(ignored -> {
+
+                showInterestsPopup(record.getAccountID(), record.getName(), 2);
             });
-          return panel;
-            
-          
+
+            abstractBtn.addActionListener(ignored -> {
+
+                showFacultyAbstractPopup(record.getAccountID(), record.getName());
+            });
+
+            infoBtn.addActionListener(ignored -> {
+
+                showFacultyInfoPopup(record.getAccountID(), record.getName());
+            });
+        }
+       return panel;   
     }
    //////////////////////////////////////////////////////////////////////////////////////////
     
