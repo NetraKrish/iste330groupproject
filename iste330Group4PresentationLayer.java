@@ -338,7 +338,7 @@ public class iste330Group4PresentationLayer {
 
                 case "1":
 
-                    showInterests();
+                    showInterests(this.account.getAccountID(), this.account.getRoleID());
                     break;
 
                 case "2":
@@ -386,7 +386,7 @@ public class iste330Group4PresentationLayer {
 
                 case "1":
 
-                    showAbstracts();
+                    showAbstracts(this.account.getAccountID());
                     break;
 
                 case "2":
@@ -868,13 +868,13 @@ public class iste330Group4PresentationLayer {
     /**
      * SHOW FACULTY ABSTRACTS
      */
-    public void showAbstracts() {
+    public void showAbstracts(int accountID) {
 
-        List<Abstract> abstracts = this.dl.getFacultyAbstracts(this.account.getAccountID());
+        List<Abstract> abstracts = this.dl.getFacultyAbstracts(accountID);
 
         lineBreak();
 
-        sendMsg("My Abstracts");
+        sendMsg("Abstracts:");
 
         for(Abstract anAbstract: abstracts) {
 
@@ -913,13 +913,24 @@ public class iste330Group4PresentationLayer {
      */
     public void removeAbstract() {
 
+        int abstractID;
+
         lineBreak();
 
         sendMsg("Remove Abstract");
         sendMsg("Abstract ID: ");
-        String abstractID = this.reader.nextLine();
 
-        if(this.dl.removeFacultyAbstract(Integer.parseInt(abstractID)) > 0) {
+        try {
+
+            abstractID = Integer.parseInt(this.reader.nextLine());
+
+        }catch (NumberFormatException e){
+
+            sendError(e.getMessage());
+            return;
+        }
+
+        if(this.dl.removeFacultyAbstract(abstractID) > 0) {
 
             sendMsg("Successfully Removed Abstract With ID: " + abstractID);
         }
@@ -928,54 +939,48 @@ public class iste330Group4PresentationLayer {
     /**
      * SHOW INTERESTS
      */
-    public void showInterests() {
+    public void showInterests(int accountID, int roleID) {
 
+        List<Interest> interests = switch (roleID) {
+            case 1 -> this.dl.getStudentInterests(accountID);
+            case 2 -> this.dl.getFacultyInterests(accountID);
+            default -> this.dl.getGuestInterests(accountID);
+        };
 
-        sendMsg("Show Interests");
-        
-        int acID = account.getAccountID();
-        if(account.getRoleID()==1)
-        {
-            sendMsg(this.dl.getStudentInterests(acID).toString());
+        lineBreak();
+
+        sendMsg("Interests:");
+
+        for(Interest interest: interests) {
+
+            lineBreak();
+
+            sendMsg("ID", interest.getInterestID() + "");
+            sendMsg("Interest", interest.getInterest());
         }
-        else if(account.getRoleID()==2)
-        {
-            sendMsg(this.dl.getFacultyInterests(acID).toString());
-        }
-        if(account.getRoleID()==3)
-        {
-            sendMsg(this.dl.getGuestInterests(acID).toString());
-        }
+
     }
 
     /**
      * ADD INTEREST
      */
     public void addInterest() {
-        sendMsg("Add Interests");
-        sendMsg("Input Interest to Add: ");
-        String interest = this.reader.nextLine();
-        int acID = account.getAccountID();
-        if(account.getRoleID()==1)
-        {
-            if(this.dl.addStudentInterest(acID,interest) > 0) {
 
-                sendMsg("Successfully Added Interest!");
-            }
-        }
-        else if(account.getRoleID()==2)
-        {
-            if(this.dl.addFacultyInterest(acID,interest) > 0) {
+        String interest;
 
-                sendMsg("Successfully Added Interest!");
-            }
-        }
-        if(account.getRoleID()==3)
-        {
-            if(this.dl.addGuestInterest(acID,interest) > 0) {
+        lineBreak();
 
-                sendMsg("Successfully Added Interest!");
-            }
+        sendMsg("Add Interest");
+        sendMsg("Interest: ");
+        interest = this.reader.nextLine();
+
+        if(switch (this.account.getRoleID()) {
+            case 1 -> this.dl.addStudentInterest(this.account.getAccountID(), interest);
+            case 2 -> this.dl.addFacultyInterest(this.account.getAccountID(), interest);
+            default -> this.dl.addGuestInterest(this.account.getAccountID(), interest);
+        } > 0) {
+
+            sendMsg("Successfully Added Interest!");
         }
 
     }
@@ -985,31 +990,133 @@ public class iste330Group4PresentationLayer {
      */
     public void removeInterest() {
 
-        sendMsg(" Remove Interests");
-        sendMsg("Input InterestID of interest to remove: ");
-        int interestID = this.reader.nextInt();
-        
-        if(account.getRoleID()==1)
-        {
-            if(this.dl.removeStudentInterest(interestID) > 0) {
+        int interestID;
 
-                sendMsg("Successfully Removed Interest!");
-            }
-        }
-        else if(account.getRoleID()==2)
-        {
-            if(this.dl.removeFacultyInterest(interestID) > 0) {
+        lineBreak();
 
-                sendMsg("Successfully Removed Interest!");
-            }
-        }
-        else if(account.getRoleID()==3)
-        {
-            if(this.dl.removeGuestInterest(interestID) > 0) {
+        sendMsg("Remove Interest");
+        sendMsg("Interest ID: ");
 
-                sendMsg("Successfully Removed Interest!");
-            }
+        try {
+
+            interestID = Integer.parseInt(this.reader.nextLine());
+
+        }catch (NumberFormatException e){
+
+            sendError(e.getMessage());
+            return;
         }
+
+        if(switch (this.account.getRoleID()){
+            case 1 -> this.dl.removeStudentInterest(interestID);
+            case 2 -> this.dl.removeFacultyInterest(interestID);
+            default -> this.dl.removeGuestInterest(interestID);
+        } > 0) {
+
+            sendMsg("Successfully Removed Interest With ID: " + interestID);
+        }
+    }
+
+    /**
+     * SEARCH RESPONSES HELPER
+     */
+
+    public void searchResponse(List<SearchRecord> records, int roleID) {
+
+        if(records == null)
+            return;
+
+        boolean back = false;
+        int accountID;
+
+        do {
+
+            lineBreak();
+
+            sendMsg("Search Results:");
+
+            records.forEach(record -> {
+
+                lineBreak();
+                sendMsg("ID: " + record.getAccountID(), record.getName());
+
+                if(record.getCommonInterests() != null)
+                    sendMsg("Common Interests", record.getCommonInterests());
+            });
+
+            lineBreak();
+
+            sendMsg("RESULTS ACTIONS");
+            sendMsg("0", "Back to Main Menu");
+            sendMsg("1", "Show Interests");
+
+            if(roleID == 2)
+                sendMsg("2", "Show Abstracts");
+
+            switch (this.reader.nextLine().trim()) {
+                case "0":
+
+                    back = true;
+                    break;
+
+                case "1":
+
+                    sendMsg("AccountID: ");
+
+                    try {
+
+                        accountID = Integer.parseInt(this.reader.nextLine());
+
+                    }catch (NumberFormatException e) {
+
+                        sendError("Invalid Input", "Must input a valid account ID");
+                        break;
+                    }
+
+                    showInterests(accountID, roleID);
+                    break;
+
+                case "2":
+
+                    sendMsg("AccountID: ");
+
+                    try {
+
+                        accountID = Integer.parseInt(this.reader.nextLine());
+
+                    }catch (NumberFormatException e) {
+
+                        sendError("Invalid Input", "Must input a valid account ID");
+                        break;
+                    }
+
+                    showAbstracts(accountID);
+                    break;
+            }
+
+        }while (!back);
+    }
+
+    /**
+     * SEARCH BY INTERESTS HELPER
+     */
+
+    public void searchByInterests(int roleID) {
+
+        lineBreak();
+
+        sendMsg("Search By Interests");
+        sendMsg("Enter Interests (separate by ','): ");
+
+        String search = this.reader.nextLine();
+
+        List<SearchRecord> records = switch (roleID) {
+            case 1 -> this.dl.searchByStudentInterest(search);
+            case 2 -> this.dl.searchByFacultyInterest(search);
+            default -> null;
+        };
+
+        searchResponse(records, roleID);
     }
 
     /**
@@ -1017,12 +1124,7 @@ public class iste330Group4PresentationLayer {
      */
     public void searchStudentInterests() {
 
-        sendMsg("Search Interests");
-        sendMsg("Enter interestID to search: ");
-        
-        int intID = this.reader.nextInt();
-        
-        sendMsg(this.dl.getStudentInterests(intID).toString());
+        searchByInterests(1);
     }
    
 
@@ -1030,12 +1132,30 @@ public class iste330Group4PresentationLayer {
      * SEARCH FACULTY INTERESTS
      */
     public void searchFacultyInterests() {
-        sendMsg("Search Interests");
-        sendMsg("Enter interestID to search: ");
-        
-        int intID = this.reader.nextInt();
-        
-        sendMsg(this.dl.getFacultyInterests(intID).toString());
+
+        searchByInterests(2);
+    }
+
+    /**
+     * SEARCH BY NAME HELPER
+     */
+
+    public void searchByName(int roleID) {
+
+        lineBreak();
+
+        sendMsg("Search By Name");
+        sendMsg("Enter Name: ");
+
+        String search = this.reader.nextLine();
+
+        List<SearchRecord> records = switch (roleID) {
+            case 1 -> this.dl.searchByStudentName(search);
+            case 2 -> this.dl.searchByFacultyName(search);
+            default -> null;
+        };
+
+        searchResponse(records, roleID);
 
     }
 
@@ -1043,13 +1163,8 @@ public class iste330Group4PresentationLayer {
      * SEARCH STUDENT NAMES
      */
     public void searchStudentNames() {
-        sendMsg("Search Interests");
-        sendMsg("Enter interestID to search: ");
-        
-        int acID = this.reader.nextInt();
-        
-        sendMsg(this.dl.getGuestInterests(acID).toString());
 
+        searchByName(1);
     }
 
     /**
@@ -1057,7 +1172,7 @@ public class iste330Group4PresentationLayer {
      */
     public void searchFacultyNames() {
 
-
+        searchByName(2);
     }
 
     /**
@@ -1065,7 +1180,16 @@ public class iste330Group4PresentationLayer {
      */
     public void searchFacultyAbstracts() {
 
+        lineBreak();
 
+        sendMsg("Search By Faculty Abstract");
+        sendMsg("Enter Abstract Title: ");
+
+        String search = this.reader.nextLine();
+
+        List<SearchRecord> records = this.dl.searchByFacultyAbstract(search);
+
+        searchResponse(records, 2);
     }
 
 

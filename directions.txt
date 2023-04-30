@@ -6,9 +6,4 @@ Authors: Miles Krassen, Evan Jurdan, Tim Lonergan, Daniel Kaszuba, Netra Krishna
 2. Setup our database on localhost.
    DATABASE FILE: iste330group4.sql
 
-3. For datalayer test, run the main method inside iste330Group4DataLayer.java
-
-* IF YOU RUN MULTIPLE TIMES, COMMENT OUT THE METHODS THAT "ADD" ITEMS OR YOU WILL GET DUPLICATES!
-
-* Feel free to mess around with some of the tester functions, and even add more tests for functions not implemented.
-* FYI, only implement the PUBLIC functions in the tests, if they are PRIVATE, they're helper functions.
+3. run either the iste330Group4PresentationLayer for the CLI OR iste330GroupPresentationLayerGUI for the GUI
