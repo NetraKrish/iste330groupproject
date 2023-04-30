@@ -1801,7 +1801,7 @@ public class iste330Group4PresentationLayerGUI {
             return mainMenu();
         }
         //records returned
-        JLabel absname = new JLabel(field.getText());
+       
         List<SearchRecord> records = this.dl.searchByFacultyAbstract(field.getText());
 
         //this is the panel to send back
@@ -1839,12 +1839,14 @@ public class iste330Group4PresentationLayerGUI {
         }
         for(SearchRecord record: records) {
 
+            
             JLabel name = new JLabel(String.format("%-5s%s", "[" + record.getAccountID() + "]", record.getName()));
             name.setBorder(new EmptyBorder(0, 0, 0, 15));
 
             panel.add(name);
+            JLabel absname = new JLabel(field.getText());
             panel.add(absname);
-           
+            System.out.println("dfg");           
 
             JButton interestBtn = new JButton("Interests");
             JButton abstractBtn = new JButton("Abstracts");
