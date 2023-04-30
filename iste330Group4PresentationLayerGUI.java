@@ -1663,9 +1663,9 @@ public class iste330Group4PresentationLayerGUI {
         
       }
       ///////
-      public JPanel abstractSearchResults(List<SearchRecord> searchRecords) {
+      public JPanel abstractSearchResults(List<SearchRecord> searchRecords, String title) {
         JPanel panel = new JPanel(new GridLayout(0,3));
-        String title = "  ";
+        
 
         String[] ids = new String[]{
             "Back",
@@ -1690,7 +1690,7 @@ public class iste330Group4PresentationLayerGUI {
 
             String[] outputs = new String[]{
                 
-                "Account ID, ","Name"
+                "Account ID, ","Name", "Abstract Title"
             };
             
             HashMap<String, JLabel> labels2 = createLabels(outputs);
@@ -1705,7 +1705,8 @@ public class iste330Group4PresentationLayerGUI {
                 
                 
                 String[] output1 = new String[]{
-                        String.valueOf(ser.getAccountID()), ser.getName()
+                        String.valueOf(ser.getAccountID()), ser.getName(), title
+
                         
                         
                     };
@@ -1767,13 +1768,13 @@ public class iste330Group4PresentationLayerGUI {
                 try{
                     String search = fields.get("Abstract: ").getText();
                     
-        
+                  
                     List<SearchRecord> searchRecords = dl.searchByFacultyAbstract(search);
                     
                   
         
         
-                    showContent(abstractSearchResults(searchRecords));
+                    showContent(abstractSearchResults(searchRecords, search));
                 }
                 catch(Exception e){
                     showPopup("Please input a valid Integer for ID");
