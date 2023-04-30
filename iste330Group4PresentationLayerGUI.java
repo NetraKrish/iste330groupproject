@@ -1846,7 +1846,7 @@ public class iste330Group4PresentationLayerGUI {
             panel.add(name);
             JLabel absname = new JLabel(field.getText());
             panel.add(absname);
-            System.out.println("dfg");           
+                    
 
             JButton interestBtn = new JButton("Interests");
             JButton abstractBtn = new JButton("Abstracts");
