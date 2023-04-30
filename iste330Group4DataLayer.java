@@ -294,7 +294,7 @@ public class iste330Group4DataLayer {
 
         try {
 
-            String sql = "SELECT CONCAT(a.firstName, ', ', a.lastName) AS name, a.accountID FROM account AS a JOIN faculty_abstract USING (accountID) JOIN abstract USING (abstractID) WHERE LOWER(abstract.title) LIKE CONCAT('%', ?, '%') GROUP BY a.accountID";
+            String sql = "SELECT CONCAT(a.firstName, ' ', a.lastName) AS name, a.accountID FROM account AS a JOIN faculty_abstract USING (accountID) JOIN abstract USING (abstractID) WHERE LOWER(abstract.title) LIKE CONCAT('%', ?, '%') GROUP BY a.accountID";
 
             this.stmt = this.conn.prepareStatement(sql);
             this.stmt.setString(1, input.toLowerCase().trim());
@@ -389,7 +389,7 @@ public class iste330Group4DataLayer {
 
         try {
 
-            String sql = "SELECT concat(a.firstName,', ' , a.lastName) as 'name', afi.accountID as 'accountID', group_concat(' ', fi.interest) AS 'commonInterests' FROM "
+            String sql = "SELECT concat(a.firstName,' ' , a.lastName) as 'name', afi.accountID as 'accountID', group_concat(' ', fi.interest) AS 'commonInterests' FROM "
                     + role + "_interest as fi JOIN account_" + role
                     + "_interest as afi on fi.interestID=afi.interestID JOIN account as a on afi.accountID=a.accountID WHERE LOWER(fi.interest) IN (";
 
